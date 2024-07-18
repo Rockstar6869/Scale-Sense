@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "46122252156",
+    "project_id": "themisto-bc398",
+    "storage_bucket": "themisto-bc398.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46122252156:android:2127a9ec2275e8449b96f9",
+        "android_client_info": {
+          "package_name": "com.example.masterapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRsWDRSVHmEzONrvA12ZN7_DMiIupGC9s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
