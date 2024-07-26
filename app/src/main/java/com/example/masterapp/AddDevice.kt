@@ -134,14 +134,22 @@ fun AddDevice(bleScanViewModel: BleScanViewModel = viewModel(),
                 timer.schedule(object : TimerTask() {
                     override fun run() {
                         CoroutineScope(Dispatchers.Default).launch {
-                        dataMutex.withLock {
-                            for (device in updateddata.value) {
-                                if (device.advertisementData.startsWith("10 FF")) {
-                                    finddevice = true
-                                    devicesfound.value += BleDevice(device.name, device.address, "")
+                            try{
+                            dataMutex.withLock {
+                                for (device in updateddata.value) {
+                                    if (device.advertisementData.startsWith("10 FF")) {
+                                        finddevice = true
+                                        devicesfound.value += BleDevice(
+                                            device.name,
+                                            device.address,
+                                            ""
+                                        )
+                                    }
                                 }
                             }
-                        }
+                        } catch (e:Exception){
+                                Log.d("UJTAG45","${e.message}")
+                            }
                     }
                     }
                 }, 0, 3000)

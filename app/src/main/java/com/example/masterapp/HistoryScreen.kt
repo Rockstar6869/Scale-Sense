@@ -31,12 +31,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import co.yml.charts.common.extensions.isNotNull
 import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
@@ -76,14 +79,15 @@ fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()){
             HorizontalDivider(thickness = 1.dp, color = Color.Black, modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp))
             Spacer(modifier = Modifier.padding(top = 80.dp))
 
-            if((weighthist.size)<2){
-                Spacer(modifier =  Modifier.padding(top = 120.dp))
-                Text(text = "You Need At Least 2 Measurements to See your History Graph",
-                    modifier = Modifier.padding(8.dp),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-            }
+                if (userHist.isNotNull() && (userHist?.size)!!< 2) {
+                    Spacer(modifier = Modifier.padding(top = 120.dp))
+                    Text(
+                        text = "You Need At Least 2 Measurements to See your History Graph",
+                        modifier = Modifier.padding(8.dp),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                }
             else {
 
                 // Content based on selected tab
@@ -145,13 +149,14 @@ fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()){
         ) {
             listOfTabs.forEachIndexed { index, tab ->
                 val isSelected = selectedTabIndex.value == index
+
                 Row {
                     Tab(
                         modifier = Modifier
-                            .height(120.dp)
+                            .height(90.dp)
                             .width(120.dp)
                             .background(
-                                if (isSelected) Color.White else colorResource(id = R.color.Home_Screen_White)
+                                if (isSelected) Color.White else colorResource(id = R.color.Tab_UnSelected)
                             ),
                         selected = selectedTabIndex.value == index,
                         onClick = {
@@ -159,14 +164,36 @@ fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()){
                                 selectedTabIndex.value = index
                             }
                         },
-                        text = { Text(text = tab.title) },
+                        text = null,
                         icon = {
-                            val tint = if (isSelected) Color.Blue else Color.Black
-                            Icon(
-                                tint = tint,
-                                painter = painterResource(id = tab.icon),
-                                contentDescription = "Icon"
-                            )
+                            Column(verticalArrangement = Arrangement.Top){
+                                if(isSelected){
+                                    HorizontalDivider(color = colorResource(id = R.color.Tab_Icon_Tint),
+                                        thickness = 4.dp)
+
+                                }                            }
+                            val tint = if (isSelected) colorResource(id = R.color.Tab_Icon_Tint)
+                            else Color.Black
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = tab.icon),
+                                    contentDescription = "Icon",
+                                    tint = tint
+                                )
+                                Spacer(modifier = Modifier.padding(vertical = 8.dp))
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = tab.title,
+                                        textAlign = TextAlign.Center)
+                                    }
+                            }
                         }
                     )
                     if (index < listOfTabs.size - 1) {

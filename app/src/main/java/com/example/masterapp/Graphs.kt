@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.jaikeerthick.composable_graphs.composables.line.LineGraph
 import com.jaikeerthick.composable_graphs.composables.line.model.LineData
@@ -44,10 +45,18 @@ fun WeightGraph(userHist: List<hist>) {
                     ),
                     yAxisLabelPosition = LabelPosition.LEFT,
                     colors = LineGraphColors(
-                        lineColor = Color.Red,
+                        lineColor = colorResource(id = R.color.Graph_Line_Color),
                         pointColor = Color.Blue,
                         fillType = LineGraphFillType.Gradient(
-                            brush = Brush.verticalGradient(listOf(Color.Green, Color.Yellow))
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    colorResource(id = R.color.Graph_Start_Blue),
+                                    colorResource(id = R.color.Graph_End_Blue),
+                                    Color.White,
+                                    Color.White,
+                                    Color.White
+                                )
+                            )
                         )
                     )
                 )
@@ -84,10 +93,18 @@ fun BMIGraph(userHist: List<hist>,HeightInCM:Double){
                         isGridVisible = true
                     ),
                     colors = LineGraphColors(
-                        lineColor = Color.Red,
+                        lineColor = colorResource(id = R.color.Graph_Line_Color),
                         pointColor = Color.Blue,
                         fillType = LineGraphFillType.Gradient(
-                            brush = Brush.verticalGradient(listOf(Color.Green, Color.Yellow))
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    colorResource(id = R.color.Graph_Start_Blue),
+                                    colorResource(id = R.color.Graph_End_Blue),
+                                    Color.White,
+                                    Color.White,
+                                    Color.White
+                                )
+                            )
                         )
                     )
                 )
@@ -131,10 +148,18 @@ fun BodyWaterPercentGraph(userHist:List<hist>,HeightInCM:Double,Age:Int,Gender:S
                         isGridVisible = true
                     ),
                     colors = LineGraphColors(
-                        lineColor = Color.Red,
+                        lineColor = colorResource(id = R.color.Graph_Line_Color),
                         pointColor = Color.Blue,
                         fillType = LineGraphFillType.Gradient(
-                            brush = Brush.verticalGradient(listOf(Color.Green, Color.Yellow))
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    colorResource(id = R.color.Graph_Start_Blue),
+                                    colorResource(id = R.color.Graph_End_Blue),
+                                    Color.White,
+                                    Color.White,
+                                    Color.White
+                                )
+                            )
                         )
                     )
                 )
@@ -180,10 +205,18 @@ fun BodyFatPercentGraph(userHist:List<hist>,HeightInCM:Double,Age:Int,Gender:Str
                         isGridVisible = true
                     ),
                     colors = LineGraphColors(
-                        lineColor = Color.Red,
+                        lineColor = colorResource(id = R.color.Graph_Line_Color),
                         pointColor = Color.Blue,
                         fillType = LineGraphFillType.Gradient(
-                            brush = Brush.verticalGradient(listOf(Color.Green, Color.Yellow))
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    colorResource(id = R.color.Graph_Start_Blue),
+                                    colorResource(id = R.color.Graph_End_Blue),
+                                    Color.White,
+                                    Color.White,
+                                    Color.White
+                                )
+                            )
                         )
                     )
                 )
@@ -237,10 +270,18 @@ fun SkeletalMuscleGraph(userHist:List<hist>,HeightInCM: Double,Age: Int,Gender:S
                         isGridVisible = true
                     ),
                     colors = LineGraphColors(
-                        lineColor = Color.Red,
+                        lineColor = colorResource(id = R.color.Graph_Line_Color),
                         pointColor = Color.Blue,
                         fillType = LineGraphFillType.Gradient(
-                            brush = Brush.verticalGradient(listOf(Color.Green, Color.Yellow))
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    colorResource(id = R.color.Graph_Start_Blue),
+                                    colorResource(id = R.color.Graph_End_Blue),
+                                    Color.White,
+                                    Color.White,
+                                    Color.White
+                                )
+                            )
                         )
                     )
                 )
@@ -285,10 +326,18 @@ fun LeanBodyMassGraph(userHist:List<hist>,Age:Int,HeightInCM: Double,Gender: Str
                 isGridVisible = true
             ),
             colors = LineGraphColors(
-                lineColor = Color.Red,
+                lineColor = colorResource(id = R.color.Graph_Line_Color),
                 pointColor = Color.Blue,
                 fillType = LineGraphFillType.Gradient(
-                    brush = Brush.verticalGradient(listOf(Color.Green, Color.Yellow))
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            colorResource(id = R.color.Graph_Start_Blue),
+                            colorResource(id = R.color.Graph_End_Blue),
+                            Color.White,
+                            Color.White,
+                            Color.White
+                        )
+                    )
                 )
             )
         )
@@ -331,10 +380,18 @@ fun BMRGraph(userHist:List<hist>,Age:Int,HeightInCM: Double,Gender: String = "M"
                         isGridVisible = true
                     ),
                     colors = LineGraphColors(
-                        lineColor = Color.Red,
+                        lineColor = colorResource(id = R.color.Graph_Line_Color),
                         pointColor = Color.Blue,
                         fillType = LineGraphFillType.Gradient(
-                            brush = Brush.verticalGradient(listOf(Color.Green, Color.Yellow))
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    colorResource(id = R.color.Graph_Start_Blue),
+                                    colorResource(id = R.color.Graph_End_Blue),
+                                    Color.White,
+                                    Color.White,
+                                    Color.White
+                                )
+                            )
                         )
                     )
                 )

@@ -51,6 +51,9 @@ class BleScanViewModel(application: Application) : AndroidViewModel(application)
 //                )
 //                _data.postValue(discoveredData)
 //            }
+            if (ActivityCompat.checkSelfPermission(getApplication(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                return
+            }
             result?.device?.let {
                 val existingDevice = discoveredData.find { it.address == result.device.address }?:BleDevice("","","")
                 val bleDevice = BleDevice(
@@ -128,6 +131,10 @@ class BleScanViewModel(application: Application) : AndroidViewModel(application)
 
     @SuppressLint("MissingPermission")
     fun getPairedDevices() {
+        if (ActivityCompat.checkSelfPermission(getApplication(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            // Request permissions here if not granted
+            return
+        }
         val devices = bluetoothAdapter?.bondedDevices?.toList() ?: emptyList()
         _pairedDevices.postValue(devices)
     }

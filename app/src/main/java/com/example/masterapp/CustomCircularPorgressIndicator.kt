@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -106,25 +107,27 @@ fun RotatingCustomProgressIndicator(progress: Float, textContent: @Composable ()
         modifier = Modifier
             .size(200.dp)
     ) {
+        val RimColor = colorResource(id = R.color.Circular_Progress_Rim)
         Canvas(
             modifier = Modifier
                 .size(200.dp)
                 .graphicsLayer(rotationZ = if (isRotating) rotationAngle else 0f)
         ) {
-            drawCircleProgressIndicator(animatedProgress)
+            drawCircleProgressIndicator(animatedProgress,RimColor)
         }
         textContent()
     }
 }
 
-fun DrawScope.drawCircleProgressIndicator(progress: Float) {
+fun DrawScope.drawCircleProgressIndicator(progress: Float,RimColor:Color) {
     val startAngle = -90f
     val sweepAngle = 360 * progress
     val strokeWidth = 8.dp.toPx()
+    val ProgressstrokeWidth = 2.dp.toPx()
 
     // Background circle
     drawCircle(
-        color = Color.Gray.copy(alpha = 0.3f),
+        color = RimColor,   //Rim Color
         radius = size.minDimension / 2,
         style = Stroke(width = strokeWidth)
     )
@@ -135,6 +138,6 @@ fun DrawScope.drawCircleProgressIndicator(progress: Float) {
         startAngle = startAngle,
         sweepAngle = sweepAngle,
         useCenter = false,
-        style = Stroke(width = strokeWidth)
+        style = Stroke(width = ProgressstrokeWidth)
     )
 }

@@ -1,6 +1,9 @@
 package com.example.masterapp
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.location.LocationManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -14,14 +17,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.rounded.KeyboardArrowRight
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -37,11 +50,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.util.Log
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.delay
@@ -53,7 +69,7 @@ import java.util.TimerTask
 import kotlin.math.abs
 
 @Composable
-fun HomeScreen(bleScanViewModel: BleScanViewModel,
+fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                userDetailsViewModel: UserDetailsViewModel = viewModel()
                 ,onNavigateToHealthReport:()->Unit){
     var progress by remember {
@@ -86,14 +102,59 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
     val devices by userDetailsViewModel.devices.observeAsState()
     val userdata by userDetailsViewModel.userData.observeAsState()
     val userHistory by userDetailsViewModel.userHist.observeAsState()
+    var NoComparableHist by remember { mutableStateOf(true) }
     var lastWeight by remember { mutableStateOf(0.0) }
+    var lastWeightDate by remember { mutableStateOf("") }
+    var secondLastWeight by remember { mutableStateOf(0.0) }
+    var secondLastWeightDate by remember { mutableStateOf("") }
+    var lastBMI by remember { mutableStateOf(0.0) }
+    var secondLastBMI by remember { mutableStateOf(0.0) }
+    lastBMI = Calculate.BMI(userdata?.heightincm?:0.0,lastWeight)
+    secondLastBMI = Calculate.BMI(userdata?.heightincm?:0.0,secondLastWeight)
+    var lastBodyFatPercent by remember { mutableStateOf(0.0) }
+    var secondLastBodyFatPercent by remember { mutableStateOf(0.0) }
+    var Increased by remember {mutableStateOf(false)}
     if(!userHistory.isNullOrEmpty()){
+        val datehist = userHistory!!.map { it.date }
         val weighthist = userHistory!!.map { it.weight }
+
         lastWeight = weighthist.last()
+        if(userHistory!!.size>1) {
+            secondLastWeightDate = datehist[datehist.size - 2]
+            secondLastWeight = weighthist[weighthist.size - 2]
+            NoComparableHist = false
+            if((lastWeight - secondLastWeight)>=0){
+                Increased = true
+            }
+        }
+
+        lastWeightDate = datehist.last()
+
+    }
+    if(userdata?.gender == "Male"){
+        lastBodyFatPercent = Calculate.BodyFatPercentforMale(userdata!!.age,lastBMI)
+        secondLastBodyFatPercent = Calculate.BodyFatPercentforMale(userdata!!.age,secondLastBMI)
+    }
+    else if (userdata?.gender == "Female"){
+        lastBodyFatPercent = Calculate.BodyFatPercentforFemale(userdata!!.age,lastBMI)
+        secondLastBodyFatPercent = Calculate.BodyFatPercentforFemale(userdata!!.age,secondLastBMI)
     }
     var showHealthReport by remember {
         mutableStateOf(false)
     }
+    val context = LocalContext.current
+    val bluetoothEnabled = remember { mutableStateOf(isBluetoothEnabled(context)) }
+    val locationEnabled = remember { mutableStateOf(isLocationEnabled(context)) }
+
+
+    LaunchedEffect(!bluetoothEnabled.value,!locationEnabled.value) {
+        while(!bluetoothEnabled.value || !locationEnabled.value) {
+            bluetoothEnabled.value = isBluetoothEnabled(context)
+            locationEnabled.value = isLocationEnabled(context)
+            delay(1000)
+        }
+    }
+
 
     if (finddevice) {
         updateddata.value.forEach {
@@ -188,8 +249,8 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
 //            Log.d("UJC","${updateddata.value}")
         }
     }
-    LaunchedEffect(isScanning.value) {
-        if(isScanning.value){
+    LaunchedEffect(isScanning.value,bluetoothEnabled.value,locationEnabled.value) {
+        if(isScanning.value&&bluetoothEnabled.value&&locationEnabled.value){
             bleScanViewModel.startDiscovery()
         }
     }
@@ -204,10 +265,15 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
 
     LaunchedEffect (finddevice){
         if(finddevice){
-            updateddata.value.forEach {
-                if (it.address == MacAd.value) {
-                    advertismentData = it.advertisementData
+            try {
+                updateddata.value.forEach {
+                    if (it.address == MacAd.value) {
+                        advertismentData = it.advertisementData
+                    }
                 }
+            }
+            catch (e:Exception){
+                    Log.d("ujjTag45","${e}")
             }
         }
     }
@@ -236,18 +302,23 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
             if (isScanning.value) {
                 timer.schedule(object : TimerTask() {
                     override fun run() {
-                        for (device in updatedAvailableDevices) {
-                            if(!devices.isNullOrEmpty()){
-                                devices!!.forEach {
-                                    if (device.address == it.address) {
-                                        MacAd.value = it.address
-                                        finddevice = true
-                            }
+                        try{
+                            for (device in updatedAvailableDevices) {
+                                if (!devices.isNullOrEmpty()) {
+                                    devices!!.forEach {
+                                        if (device.address == it.address) {
+                                            MacAd.value = it.address
+                                            finddevice = true
+                                        }
+                                    }
                                 }
                             }
-                        }
 
-                    }
+                        }
+                        catch(e:Exception){
+                            Log.d("ujjTag45","${e}")
+                        }
+                }
                 }, 0, 500)
             }
         }
@@ -298,6 +369,23 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
                         shape = RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp)
                     )
             ){
+                Row (
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp)
+                        .padding(end = 10.dp),
+                    horizontalArrangement = Arrangement.End){
+                    IconButton(onClick = { isRefreshing = true}
+                        ,
+                        Modifier
+                            .background(color = Color.Black, shape = CircleShape)
+                            .size(30.dp)) {
+                        Icon(painter = painterResource(id = R.drawable.baseline_refresh_24),
+                            contentDescription = "Refresh",
+                            tint = Color.White)
+                    }
+
+                }
                 Column (horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()){
                     Spacer(modifier = Modifier.padding(vertical = 40.dp))
@@ -330,13 +418,32 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
                                     }
                                 }
                                 else{
-                                    Spacer(modifier = Modifier.padding(horizontal = 16.dp))
-                                    Text(
-                                        text = "--",
-                                        fontSize = 35.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
-                                    )
+                                    if(lastWeight==0.0) {
+                                        Spacer(modifier = Modifier.padding(horizontal = 16.dp))
+                                        Text(
+                                            text = "--",
+                                            fontSize = 35.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                    }
+                                    else{
+                                        Text(
+                                            text = "$lastWeight",
+                                            fontSize = 35.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                        Column {
+                                            Spacer(modifier = Modifier.padding(vertical = 6.dp))
+                                            Text(
+                                                text = "Kg",
+                                                fontSize = 22.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                        }
+                                    }
                                 }
                                 }
                             }
@@ -348,38 +455,171 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
+                    .fillMaxSize()
             ){
-                Column (Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
+                Column (
+                    Modifier
+                        .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally){
-//                    Text(text = advertismentData)
-//                        Text(text ="$lastWeight")
-//                    CustomSlider3(value = 56.7f, onValueChange = {},
-//                        blueRange = 0f..50.0f,
-//                        greenRange = 50.0f..100f,
-//                        orangeRange = 100f..150f,
-//                        blueText = "Low",
-//                        greenText = "Stan",
-//                        orangeText = "High")
-                    Row (
+                    Spacer(modifier = Modifier.height(80.dp))
+                    Box (
                         Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 200.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically){
-                        Text(text = "My Health Report",
-                            color =  colorResource(id = R.color.Slider_DarkGreen),
-                            modifier = Modifier.pointerInput(Unit) {
+                            .background(Color.White)
+                            .height(210.dp)){
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = if(!NoComparableHist) lastWeightDate else "",
+                                fontSize = 15.sp,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = if(!NoComparableHist) "${(lastWeight-secondLastWeight).format(2).toDouble()} Kg" else "--",
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = if(!NoComparableHist) Modifier.padding(start = 18.dp) else Modifier,
+                                        fontSize = 20.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Row (verticalAlignment = Alignment.CenterVertically){
+                                        if(!NoComparableHist) {
+                                            if (Increased) androidx.compose.material.Icon(
+                                                painter = painterResource(id = R.drawable.baseline_increase),
+                                                contentDescription = "increased",
+                                                tint = Color.Green,
+                                                modifier = Modifier.size(30.dp)
+                                            )
+                                            else androidx.compose.material.Icon(
+                                                painter = painterResource(id = R.drawable.baseline_decrease),
+                                                contentDescription = "decreased",
+                                                tint = Color.Red,
+                                                modifier = Modifier.size(30.dp)
+                                            )
+                                        }
+
+                                        Text(
+                                            text = "Weight",
+                                            fontSize = 15.sp
+                                        )
+                                    }
+                                }
+
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = if(NoComparableHist) "--" else "${(lastBMI-secondLastBMI).format(2).toDouble()}",
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = if(!NoComparableHist) Modifier.padding(start = 24.dp) else Modifier,
+                                        fontSize = 20.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Row (verticalAlignment = Alignment.CenterVertically){
+                                        if(!NoComparableHist) {
+                                            if (Increased) androidx.compose.material.Icon(
+                                                painter = painterResource(id = R.drawable.baseline_increase),
+                                                contentDescription = "increased",
+                                                tint = Color.Green,
+                                                modifier = Modifier.size(30.dp)
+                                            )
+                                            else androidx.compose.material.Icon(
+                                                painter = painterResource(id = R.drawable.baseline_decrease),
+                                                contentDescription = "decreased",
+                                                tint = Color.Red,
+                                                modifier = Modifier.size(30.dp)
+                                            )
+                                        }
+                                        Text(
+                                            text = "BMI",
+                                            fontSize = 15.sp
+                                        )
+                                    }
+                                }
+
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = if(!NoComparableHist) "${(lastBodyFatPercent-secondLastBodyFatPercent).format(2).toDouble()}%" else "--",
+                                        modifier = if(!NoComparableHist) Modifier.padding(start = 18.dp) else Modifier,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Row (verticalAlignment = Alignment.CenterVertically){
+                                        if(!NoComparableHist) {
+                                            if (Increased) androidx.compose.material.Icon(
+                                                painter = painterResource(id = R.drawable.baseline_increase),
+                                                contentDescription = "increased",
+                                                tint = Color.Green,
+                                                modifier = Modifier.size(30.dp)
+                                            )
+                                            else androidx.compose.material.Icon(
+                                                painter = painterResource(id = R.drawable.baseline_decrease),
+                                                contentDescription = "decreased",
+                                                tint = Color.Red,
+                                                modifier = Modifier.size(30.dp)
+                                            )
+                                        }
+                                        Text(
+                                            text = "Body Fat(%)",
+                                            fontSize = 15.sp
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(18.dp))
+                            Text(
+                                text = if(!NoComparableHist) "Compare with $secondLastWeightDate" else "",
+                                fontSize = 15.sp,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                            Spacer(modifier = Modifier.height(25.dp))
+                            Row (Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                                , verticalAlignment = Alignment.CenterVertically){
+                                Text(
+                                    text = "More",
+                                    fontSize = 15.sp,
+                                    color = Color.Blue,
+                                    modifier = Modifier.pointerInput(Unit) {
                                 detectTapGestures(onTap = {
                                     onNavigateToHealthReport()
-                                })})
-                        Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = "Health Report",
-                            tint = colorResource(id = R.color.Slider_DarkGreen),
-                            modifier = Modifier.pointerInput(Unit) {
-                                detectTapGestures(onTap = {
-                                    onNavigateToHealthReport()
-                                })})
+                                })}
+                                )
+                                    Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription ="More",
+                                        tint = Color.Blue,
+                                        modifier = Modifier
+                                            .padding(end = 8.dp)
+                                            .pointerInput(Unit) {
+                                                detectTapGestures(onTap = {
+                                                    if (!userHistory.isNullOrEmpty()) {
+                                                        onNavigateToHealthReport()
+                                                    }
+                                                })
+                                            }
+                                    )
+
+                            }
+                        }
+
+
                     }
 
                 }
@@ -416,6 +656,11 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Center
                 ) {
+                    Icon(painter = painterResource(id = R.drawable.baseline_monitor_weight_24),
+                        contentDescription = "weight"
+                            ,Modifier.align(Alignment.CenterHorizontally)
+                            .padding(end = 12.dp))
+
                     if(Locked!="1") {
                         Row {
                             Spacer(modifier = Modifier.padding(horizontal = 10.dp))
@@ -430,6 +675,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
                         Text(
                             text = "$weightinkgs Kg",
                             color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(vertical = 8.dp),
                             fontSize = 18.sp
                         )
                     }
@@ -450,6 +696,9 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
+                    Icon(painter = painterResource(id = R.drawable.calculator),
+                        contentDescription = "BMI"
+                        ,Modifier.align(Alignment.CenterHorizontally))
                     if(Locked!="1") {
                         Text(
                             text = "--",
@@ -460,6 +709,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
                     else{
                         Text(
                             text = "${Calculate.BMI(userdata?.heightincm?:0.0,weightinkgs)}",
+                            modifier = Modifier.padding(vertical = 8.dp),
                             color = MaterialTheme.colorScheme.primary,
                             fontSize = 18.sp
                         )
@@ -481,6 +731,11 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.Center
                 ) {
+                    Icon(painter = painterResource(id = R.drawable.google_fit),
+                        contentDescription = "BodyFat"
+                        ,Modifier.align(Alignment.CenterHorizontally)
+                            .padding(end = 28.dp))
+
                     if(Locked!="1") {
                         Row (
                             Modifier
@@ -489,7 +744,8 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
                             verticalAlignment = Alignment.CenterVertically){
                             Text(
                                 text = "--",
-                                color = MaterialTheme.colorScheme.onBackground,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(start = 4.dp),
                                 fontSize = 30.sp
                             )
                         }
@@ -504,6 +760,8 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
                                     )
                                 }%",
                                 color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(end = 15.dp)
+                                    .padding(vertical = 8.dp),
                                 fontSize = 18.sp
                             )
                         }
@@ -516,6 +774,8 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel,
                                     )
                                 }%",
                                 color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(end = 15.dp)
+                                    .padding(vertical = 8.dp),
                                 fontSize = 18.sp
                             )
                         }

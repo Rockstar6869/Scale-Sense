@@ -8,8 +8,14 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="blue">#C6E2FF</color>
-    <color name="Home_Screen_Blue">#4673d2</color>
-    <color name="Home_Screen_White">#d9d9d9</color>
+    <color name="Home_Screen_Blue">#69DBFF</color>
+    <color name="Home_Screen_White">#F2F2F2</color>
+    <color name="Tab_UnSelected">#EBEBEB</color>
+    <color name="Tab_Icon_Tint">#24ACFF</color>
+    <color name="Circular_Progress_Rim">#54AFCC</color>
+    <color name="Graph_Start_Blue">#CDECF5</color>
+    <color name="Graph_End_Blue">#E7F8FE</color>
+    <color name="Graph_Line_Color">#001BFB</color>
     <color name="Slider_Blue">#3689d3</color>
     <color name="Slider_Green">#3ecc00</color>
     <color name="Slider_DarkGreen">#00945a</color>

@@ -1,5 +1,6 @@
 package com.example.masterapp
 
+import android.nfc.Tag
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,8 +52,10 @@ fun HealthReportScreen(onBackClick: () -> Unit,
         val weighthist = userHistory!!.map { it.weight }
         lastWeight = weighthist.last()
 
-        secondLastWeight = weighthist[weighthist.size - 2]
-        secondLastWeightDate = datehist[datehist.size - 2]
+        if(userHistory!!.size>1) {
+            secondLastWeight = weighthist[weighthist.size - 2]
+            secondLastWeightDate = datehist[datehist.size - 2]
+        }
 
         val impedancehist = userHistory!!.map { it.impedance }
         lastImpedance = impedancehist.last()
@@ -90,30 +94,35 @@ fun HealthReportScreen(onBackClick: () -> Unit,
     secondLastBMI = Calculate.BMI(userData?.heightincm?:0.0,secondLastWeight)
 
         Scaffold(
+            backgroundColor = colorResource(id = R.color.Home_Screen_White),
             topBar = {
                 TopAppBar(
                     title = {
                         Row (
                             Modifier
                                 .fillMaxWidth()
-                                .padding(end = 40.dp)
+                                .padding(end = 70.dp)
+                                .padding(top = 40.dp)
                         , horizontalArrangement = Arrangement.Center){
-                            Text(text = "Health Report")
+                            Text(text = "Health Report",
+                                color = Color.White)
                         }
                             },
                     navigationIcon = {
-                        IconButton(onClick = onBackClick) {
+                        IconButton(onClick = onBackClick,
+                            Modifier.padding(top = 40.dp)) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = "Back",
+                                tint = Color.White
                             )
                         }
                     },
-                    backgroundColor = Color.White,
+                    backgroundColor = colorResource(id = R.color.Home_Screen_Blue),
                     contentColor = Color.Black,
                     modifier = Modifier
-                        .height(80.dp)
-                        .padding(top = 12.dp)
+                        .height(100.dp),
+                    elevation = 0.dp
                 )
             },
             content = {
@@ -122,110 +131,416 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                         .fillMaxSize()
                         .padding(it)
                 ) {
+//                    item{
+//                        InfoCard(title = "Compare with $secondLastWeightDate",
+//                            weight = "${(lastWeight-secondLastWeight).format(2).toDouble()} Kg",
+//                            BMI = "${(BMI-secondLastBMI).format(2).toDouble()}",
+//                            BodyFatPercent = "${(bodyFatPercent-secondLastBodyFatPercent).format(2).toDouble()}%"
+//                                , Increased = if(lastWeight-secondLastWeight>0) true else false)
+//                    }
                     item{
-                        InfoCard(title = "Compare with $secondLastWeightDate",
-                            weight = "${(lastWeight-secondLastWeight).format(2).toDouble()} Kg",
-                            BMI = "${(BMI-secondLastBMI).format(2).toDouble()}",
-                            BodyFatPercent = "${(bodyFatPercent-secondLastBodyFatPercent).format(2).toDouble()}%"
-                                , Increased = if(lastWeight-secondLastWeight>0) true else false)
-                    }
+                        BodyInfoBox()
+                        Column (
+                            Modifier
+                                .background(Color.White)){
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Row(
+                                Modifier.padding(start = 16.dp),
+                            ) {
+                                Text(text = "Body Composition",
+                                    color = colorResource(id = R.color.Home_Screen_Blue))
 
-                    item {
-                        Spacer(modifier = Modifier.height(40.dp))
-                        ExpandableRow(index = "Weight", value = "$lastWeight Kgs") {
-                            Row(Modifier.padding(horizontal = 16.dp)) {
-                                CustomSlider3(
-                                    value = lastWeight.toFloat(),
+                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+                                Divider(
+                                    color = Color.Blue,
+                                    thickness = (0.9).dp,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                )
+                        }
+
+//                        Spacer(modifier = Modifier.height(40.dp))
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .background(color = Color.White)) {
+                            Column{
+                            ExpandableRow(index = "Weight",
+                                value = "$lastWeight Kgs",
+                                Tag = {
+                                    if(lastWeight<=40){
+                                        BlueTag(text = "Underweight")
+                                    }
+                                    else if(lastWeight>40 && lastWeight<=80){
+                                        GreenTag(text = "Normal")
+                                    }
+                                    else{
+                                        OrangeTag(text = "Overweight")
+                                    }
+                                }) {
+                                    CustomSlider3(
+                                        value = lastWeight.toFloat(),
+                                        onValueChange = {},
+                                        blueRange = 0f..40f,
+                                        greenRange = 40f..80f,
+                                        orangeRange = 80f..120f,
+                                        blueText = "Underweight",
+                                        greenText = "Normal",
+                                        orangeText = "Overweight",
+                                        trackHeight = 20f
+                                    )
+                            }
+                            Divider(
+                                color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                thickness = 1.dp, // Very thin thickness
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            ExpandableRow(index = "BMI",
+                                value = "$BMI",
+                                Tag = {
+                                    if(BMI<=18.5){
+                                        BlueTag(text = "Underweight")
+
+                                    }        
+                                    else if(BMI>18.5 && BMI<25){
+                                        GreenTag(text = "Normal")
+
+                                    }   
+                                    else if(BMI>=25 && BMI<30){
+                                        OrangeTag(text = "High")
+                                    }
+                                    else{
+                                        RedTag(text = "Overweight")
+                                    }
+                                }) {
+                                BMISlider(
+                                    value = BMI.toFloat(),
                                     onValueChange = {},
-                                    blueRange = 0f..40f,
-                                    greenRange = 40f..80f,
-                                    orangeRange = 80f..120f,
+                                    blueRange = 0f..18.5f,
+                                    greenRange = 18.5f..25.0f,
+                                    orangeRange = 25.0f..30.0f,
+                                    redRange = 30.0f..35f,
                                     blueText = "Underweight",
                                     greenText = "Normal",
-                                    orangeText = "Overweight"
+                                    orangeText = "High",
+                                    redText = "Overweight",
+                                    trackHeight = 20f
                                 )
                             }
+                            Divider(
+                                color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                thickness = 1.dp, // Very thin thickness
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            ExpandableRow(index = "Body Water%",
+                                value = "$bodyWaterPercent%",
+                                Tag = {
+                                    if(bodyWaterPercent<=50){
+                                        BlueTag(text = "Low")
+
+                                    }
+                                    else if(bodyWaterPercent>50 && bodyWaterPercent<=65){
+                                        GreenTag(text = "Standard")
+                                    }
+                                    else{
+                                        OrangeTag(text = "High")
+                                    }
+                                }) {
+                                BodyWaterPercentSlider(
+                                    value = bodyWaterPercent.toFloat(),
+                                    onValueChange = {},
+                                    blueRange = 0f..50f,
+                                    greenRange = 50f..65f,
+                                    orangeRange = 65f..115f,
+                                    blueText = "Low",
+                                    greenText = "Standard",
+                                    orangeText = "High",
+                                    trackHeight = 20f
+                                )
+                            }
+                            Divider(
+                                color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                thickness = 1.dp, // Very thin thickness
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            ExpandableRow(index = "Body Fat%",
+                                value = "$bodyFatPercent%",
+                                Tag = {
+                                    if(bodyFatPercent<=6){
+                                        BlueTag(text = "Low")
+                                    }
+                                    else if(bodyFatPercent>6 && bodyFatPercent<=22){
+                                        GreenTag(text = "Standard")
+                                    }
+                                    else if(bodyFatPercent>22 && bodyFatPercent>=27){
+                                        OrangeTag(text = "High")
+
+                                    }
+                                    else{
+                                        RedTag(text = "Over")
+                                    }
+                                }) {
+                                BodyFatPercentSlider(
+                                    value = bodyFatPercent.toFloat(),
+                                    onValueChange = {},
+                                    blueRange = 0f..6f,
+                                    greenRange = 6f..22f,
+                                    orangeRange = 22f..27f,
+                                    redRange = 27f..38f,
+                                    blueText = "Low",
+                                    greenText = "Standard",
+                                    orangeText = "High",
+                                    redText = "Over",
+                                    trackHeight = 20f
+                                )
+                            }
+                            Divider(
+                                color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                thickness = 1.dp, // Very thin thickness
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            ExpandableRow(
+                                index = "Lean Body Mass%",
+                                value = "$LeanBodyMassPercent%",
+                                Tag = {
+                                    if(LeanBodyMassPercent<68){
+                                        BlueTag(text = "Low")
+                                    }
+                                    else if(LeanBodyMassPercent>=68 && LeanBodyMassPercent<=90){
+                                        GreenTag(text = "Standard")
+                                    }
+                                    else{
+                                        OrangeTag(text = "High")
+                                    }
+                                }
+                            ) {
+                                LeanBodyMassPercentSlider(
+                                    value = LeanBodyMassPercent.toFloat(),
+                                    onValueChange = {},
+                                    blueRange = 0f..68f,
+                                    greenRange = 68f..90f,
+                                    orangeRange = 90f..100f,
+                                    blueText = "Low",
+                                    greenText = "Standard",
+                                    orangeText = "High",
+                                    trackHeight = 20f
+                                )
+                            }
+                            Divider(
+                                color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                thickness = 1.dp, // Very thin thickness
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            ExpandableRow(index = "BMR",
+                                value = "$BMR kcal",
+                                Tag = {
+                                    if(BMR<=1450){
+                                        BlueTag(text = "Low")
+                                    }
+                                    else if(BMR>1450 && BMR<=1650){
+                                        GreenTag(text = "Good")
+
+                                    }
+                                    else if(BMR>1650){
+                                        DarkGreenTag(text = "Excellent")
+
+                                    }                                }) {
+                                BMRSlider(
+                                    value = BMR.toFloat(),
+                                    onValueChange = {},
+                                    blueRange = 0f..1450f,
+                                    greenRange = 1450f..1650f,
+                                    darkGreenRange = 1650f..3000f,
+                                    blueText = "Low",
+                                    greenText = "Good",
+                                    darkGreenText = "Excellent",
+                                    trackHeight = 20f
+
+                                )
+                            }
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                ExpandableRow(index = "Bone%",
+                                    value = "0%",
+                                    Tag = {}) {
+                                    //Slider
+                                }
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                ExpandableRow(index = "Protein%",
+                                    value = "0%",
+                                    Tag = {}) {
+                                    //Slider
+                                }
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                ExpandableRow(index = "Muscle%",
+                                    value = "0%",
+                                    Tag = {}) {
+                                    //Slider
+                                }
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                ExpandableRow(index = "Visceral Fat Index",
+                                    value = "0",
+                                    Tag = {}) {
+                                    //Slider
+                                }
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                ExpandableRow(index = "Subcutaneous Fat",
+                                    value = "0 Kg",
+                                    Tag = {}) {
+                                    //Slider
+                                }
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                ExpandableRow(index = "Body Age",
+                                    value = "0",
+                                    Tag = {}) {
+                                    //Slider
+                                }
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                ExpandableRow(index = "AMR",
+                                    value = "0 Kcal",
+                                    Tag = {}) {
+                                    //Slider
+                                }
+
                         }
                     }
-                        item{
-                        Spacer(modifier = Modifier.height(4.dp))
-                        ExpandableRow(index = "BMI", value = "$BMI") {
-                            BMISlider(
-                                value = BMI.toFloat(),
-                                onValueChange = {},
-                                blueRange = 0f..18.5f,
-                                greenRange = 18.5f..25.0f,
-                                orangeRange = 25.0f..30.0f,
-                                redRange = 30.0f..35f,
-                                blueText = "Underweight",
-                                greenText = "Normal",
-                                orangeText = "High",
-                                redText = "Overweight"
-                            )
-                        }}
-                        item{
-                        Spacer(modifier = Modifier.height(4.dp))
-                        ExpandableRow(index = "Body Water%", value = "$bodyWaterPercent%") {
-                            BodyWaterPercentSlider(
-                                value = bodyWaterPercent.toFloat(),
-                                onValueChange = {},
-                                blueRange = 0f..50f,
-                                greenRange = 50f..65f,
-                                orangeRange = 65f..115f,
-                                blueText = "Low",
-                                greenText = "Standard",
-                                orangeText = "High"
+                        Spacer(modifier = Modifier.height(15.dp))
+
+                        Column (
+                            Modifier
+                                .background(Color.White)){
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Row(
+                                Modifier.padding(start = 16.dp),
+                            ) {
+                                Text(text = "Weight Management",
+                                    color = colorResource(id = R.color.Home_Screen_Blue))
+
+                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Divider(
+                                color = Color.Blue,
+                                thickness = (0.9).dp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
                             )
                         }
-                    }
-                        item{
-                        Spacer(modifier = Modifier.height(4.dp))
-                        ExpandableRow(index = "Body Fat%", value = "$bodyFatPercent%") {
-                            BodyFatPercentSlider(
-                                value = bodyFatPercent.toFloat(),
-                                onValueChange = {},
-                                blueRange = 0f..6f,
-                                greenRange = 6f..22f,
-                                orangeRange = 22f..27f,
-                                redRange = 27f..38f,
-                                blueText = "Low",
-                                greenText = "Standard",
-                                orangeText = "High",
-                                redText = "Over"
-                            )
+
+
+                        
+//                        Spacer(modifier = Modifier.height(40.dp))
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .background(color = Color.White)) {
+                            Column {
+                                NonExpandableRow(index = "Standard weight", value = "0.00 Kg")
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                NonExpandableRow(index = "Weight control", value = "0.00 Kg")
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                NonExpandableRow(index = "Fat control", value = "0.00 Kg")
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                NonExpandableRow(index = "Muscle control", value = "0.00 Kg")
+                                Divider(
+                                    color = Color.LightGray.copy(alpha = 0.5f), // Light color with some transparency
+                                    thickness = 1.dp, // Very thin thickness
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+
+                                Spacer(modifier = Modifier.height(100.dp))
+                            }
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                    item{
-                        ExpandableRow(index = "Lean Body Mass%", value = "$LeanBodyMassPercent%") {
-                            LeanBodyMassPercentSlider(
-                                value = LeanBodyMassPercent.toFloat(),
-                                onValueChange = {},
-                                blueRange = 0f..68f,
-                                greenRange = 68f..90f,
-                                orangeRange = 90f..100f,
-                                blueText = "Low",
-                                greenText = "Standard",
-                                orangeText ="High"
-                            )
+
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                    item{
-                        ExpandableRow(index = "BMR", value = "$BMR kcal") {
-                            BMRSlider(
-                                value = BMR.toFloat(),
-                                onValueChange = {},
-                                blueRange = 0f..1450f,
-                                greenRange = 1450f..1650f,
-                                darkGreenRange = 1650f..3000f,
-                                blueText = "Low",
-                                greenText = "Good",
-                                darkGreenText ="Excellent"
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(100.dp))
-                    }
+
                     }
 
                 })
@@ -233,17 +548,14 @@ fun HealthReportScreen(onBackClick: () -> Unit,
     }
 
 @Composable
-fun ExpandableRow(index: String, value: String, expandedContent: @Composable () -> Unit) {
+fun ExpandableRow(index: String, value: String,
+                  Tag:@Composable () -> Unit,
+                  expandedContent: @Composable () -> Unit) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Row(
         Modifier
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = Color.LightGray, // Use a light color for the border
-                shape = RectangleShape
-            )
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     isExpanded = !isExpanded
@@ -263,11 +575,15 @@ fun ExpandableRow(index: String, value: String, expandedContent: @Composable () 
                     modifier = Modifier.weight(1f),
                     fontWeight = FontWeight.ExtraBold
                 )
-                Text(
-                    text = value,
-                    modifier = Modifier.padding(start = 80.dp),
-                    fontWeight = FontWeight.Bold
-                )
+                Row (verticalAlignment = Alignment.CenterVertically){
+                    Text(
+                        text = value,
+                        modifier = Modifier.padding(start = 80.dp),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.padding(4.dp))
+                    Tag()
+                }
 
                 IconButton(onClick = { isExpanded = !isExpanded }) {
                     Icon(
@@ -287,68 +603,170 @@ fun ExpandableRow(index: String, value: String, expandedContent: @Composable () 
 }
 
 @Composable
-fun InfoCard(title: String,weight:String,BMI:String,BodyFatPercent:String,
-                Increased:Boolean) {
-    Card(
+fun BodyInfoBox() {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .background(color = colorResource(id = R.color.Home_Screen_Blue))
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .padding(16.dp)
+                .fillMaxWidth()
+                .padding(top = 12.dp, bottom = 12.dp)
+                .padding(horizontal = 36.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row (Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center){
-                Text(
-                    text = title,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "Body Age",
+                    fontSize = 16.sp,
+                    color = Color.White)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(text = "23.02",
+                    fontSize = 25.sp,
+                    color = Color.White)
             }
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                BodyScoreCircularProgressIndicator(progress = 30f, modifier = Modifier.size(80.dp)) {
+                            Column (Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center){
+                                Text(text = "Body Score",
+                                    color = Color.White,
+                                    fontSize = 10.sp)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(text = "30",
+                                    color = Color.White,
+                                    fontSize = 30.sp)
+                            }
+                        }
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "Body Fat",
+                    fontSize = 16.sp,
+                    color = Color.White)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(text = "14.03%",
+                    fontSize = 25.sp,
+                    color = Color.White)
+            }
+        }
+        Divider(
+            color = Color.White.copy(alpha = 0.5f), // Light color with some transparency
+            thickness = (0.9).dp, // Very thin thickness
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 12.dp)
+        )
+        Box (
+            Modifier
+                .fillMaxWidth()
+                .height(120.dp)){
+            Text(text = "Compare with 20/07/2024",
+                fontSize = 16.sp,
+                modifier = Modifier.align(Alignment.TopCenter),
+                color = Color.White)
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row (Modifier.fillMaxWidth()){
-                        if (Increased) Icon(painter = painterResource(id = R.drawable.baseline_increase), contentDescription = "increased", tint = Color.Green
-                            ,modifier = Modifier.size(30.dp))
-                        else Icon(painter = painterResource(id = R.drawable.baseline_decrease), contentDescription = "decreased",tint = Color.Red
-                            ,modifier = Modifier.size(30.dp))
-                        Text(text = weight, fontSize = 20.sp)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "-43.22 Kg",
+                            fontSize = 18.sp,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Weight",
+                            color = Color.White
+                        )
                     }
-                    Text(text = "Weight", fontSize = 14.sp)
-                }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Row (Modifier.fillMaxWidth()){
-                        if (Increased) Icon(painter = painterResource(id = R.drawable.baseline_increase), contentDescription = "increased", tint = Color.Green
-                            ,modifier = Modifier.size(30.dp))
-                        else Icon(painter = painterResource(id = R.drawable.baseline_decrease), contentDescription = "decreased",tint = Color.Red
-                            ,modifier = Modifier.size(30.dp))
-                        Text(text = BMI, fontSize = 20.sp)
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "-18.23",
+                            fontSize = 18.sp,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "BMI",
+                            color = Color.White
+                        )
                     }
-                    Text(text = "BMI", fontSize = 14.sp)
-                }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Row (Modifier.fillMaxWidth()){
-                        if (Increased) Icon(painter = painterResource(id = R.drawable.baseline_increase), contentDescription = "increased", tint = Color.Green
-                            ,modifier = Modifier.size(30.dp))
-                        else Icon(painter = painterResource(id = R.drawable.baseline_decrease), contentDescription = "decreased",tint = Color.Red
-                            ,modifier = Modifier.size(30.dp))
-                        Text(text = BodyFatPercent, fontSize = 20.sp)
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "-17.67%",
+                            fontSize = 18.sp,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Body Fat(%)",
+                            color = Color.White
+                        )
                     }
-                    Text(text = "Body Fat%", fontSize = 14.sp)
                 }
+            }
+
+
+        }
+    }
+}
+
+@Composable
+fun NonExpandableRow(index: String, value: String) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    isExpanded = !isExpanded
+                })
+            }) {
+        Column (Modifier.fillMaxHeight()){
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .animateContentSize()
+                    .padding(8.dp)
+                    .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = index,
+                    modifier = Modifier.weight(1f),
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    text = value,
+                    modifier = Modifier.padding(start = 80.dp),
+                    fontWeight = FontWeight.Bold
+                )
+
             }
         }
     }
@@ -358,10 +776,4 @@ fun InfoCard(title: String,weight:String,BMI:String,BodyFatPercent:String,
 @Composable
 fun HealthReportScreenPreview() {
     HealthReportScreen( onBackClick = {})
-}
-
-@Preview(showBackground = true)
-@Composable
-fun InfoCardPreview() {
-    InfoCard(title = "Health Stats","40 Kg","18.7","40%",true)
 }

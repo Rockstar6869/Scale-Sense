@@ -33,7 +33,8 @@ fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
         startDestination = Screen.BottomScreen.HomeScreen.route ){
 
         composable(Screen.BottomScreen.HomeScreen.route,
-            enterTransition =  {slideInHorizontally() })
+//            enterTransition =  {slideInHorizontally() }
+        )
         {       BackHandler {
 
             handleBackButtonPress(
@@ -45,11 +46,12 @@ fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
 
         }
 
-                HomeScreen(bleScanViewModel = bluetoothViewModel,
+                HomeScreen( bleScanViewModel =  bluetoothViewModel,
                     onNavigateToHealthReport = {navController.navigate(Screen.HealthReportScreen.route)})
         }
         composable(Screen.BottomScreen.HistoryScreen.route,
-            enterTransition =  {slideInHorizontally() })
+//            enterTransition =  {slideInHorizontally() }
+        )
         {
             BackHandler {  //used for handling back button click
                 handleBackButtonPress(   //used for exiting if back is pressed twice
@@ -62,7 +64,8 @@ fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
             HistoryScreen()
         }
         composable(Screen.BottomScreen.MeScreen.route,
-            enterTransition =  {slideInHorizontally() })
+//            enterTransition =  {slideInHorizontally() }
+        )
         {
             BackHandler {  //used for handling back button click
                 handleBackButtonPress(   //used for exiting if back is pressed twice

@@ -110,6 +110,12 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,onUpdateDetailsClick:()->Unit,auth
         Divider(color = Color.LightGray, thickness = 0.9.dp)
             Spacer(modifier = Modifier.padding(vertical = 40.dp))
         Divider(color = Color.LightGray, thickness = 0.9.dp)
+        ClickableRow(Icon = painterResource(id = R.drawable.baseline_password_24), textContent = {
+            Text(text = "Change Password")
+        }) {
+
+        }
+        Divider(color = Color.LightGray, thickness = 0.9.dp)
         ClickableRow(Icon = painterResource(id = R.drawable.baseline_logout_24), textContent = { Text(
             text = "Log Out",
             color = Color.Red

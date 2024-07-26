@@ -1,5 +1,4 @@
 package com.example.masterapp
-import android.widget.Space
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Slider
@@ -1144,6 +1143,662 @@ fun BMRSlider(
     }
 }
 
+@Composable
+fun BonePercentSlider(
+    modifier: Modifier = Modifier,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    blueRange: ClosedFloatingPointRange<Float>,
+    greenRange: ClosedFloatingPointRange<Float>,
+    darkGreenRange: ClosedFloatingPointRange<Float>,
+    blueText:String,
+    greenText:String,
+    darkGreenText:String,
+    trackHeight: Float = 32f
+) {
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        val blue = colorResource(id = R.color.Slider_Blue)
+        val green = colorResource(id = R.color.Slider_Green)
+        val darkGreen= colorResource(id = R.color.Slider_DarkGreen)
+        val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (darkGreenRange.endInclusive - darkGreenRange.start)
+
+        Box(
+            modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = blueRange.endInclusive.toString(),
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 190.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = greenRange.endInclusive.toString(),
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(end = 100.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+            Canvas(modifier = Modifier
+                .fillMaxWidth()
+                .height(trackHeight.dp)
+                .align(Alignment.CenterStart)
+            ) {
+                val width = size.width
+                val blueWidth = (blueRange.endInclusive / totalRange) * width
+                val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
+                val orangeWidth = ((darkGreenRange.endInclusive - darkGreenRange.start) / totalRange) * width
+
+                // Draw the first part of the track (red)
+                drawLine(
+                    color = blue,
+                    start = androidx.compose.ui.geometry.Offset(0f, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+
+                // Draw the second part of the track (green)
+                drawLine(
+                    color = green,
+                    start = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+
+                // Draw the third part of the track (magenta)
+                drawLine(
+                    color = darkGreen,
+                    start = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth + orangeWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 38.dp)
+            ) {
+                Text(
+                    text = blueText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 100.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = greenText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 80.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = darkGreenText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 40.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Draw the Slider
+            Slider(
+                value = value,
+                onValueChange = onValueChange,
+                valueRange = 0f..totalRange,  // Set the total range for the slider
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterStart),
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.Gray,
+                    activeTrackColor = Color.Transparent,
+                    inactiveTrackColor = Color.Transparent
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun ProteinPercentSlider(
+    modifier: Modifier = Modifier,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    blueRange: ClosedFloatingPointRange<Float>,
+    greenRange: ClosedFloatingPointRange<Float>,
+    orangeRange: ClosedFloatingPointRange<Float>,
+    blueText:String,
+    greenText:String,
+    orangeText:String,
+    trackHeight: Float = 32f
+) {
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        val blue = colorResource(id = R.color.Slider_Blue)
+        val green = colorResource(id = R.color.Slider_Green)
+        val orange= colorResource(id = R.color.Slider_Orange)
+        val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (orangeRange.endInclusive - orangeRange.start)
+
+        Box(
+            modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                Text(
+                    text = blueRange.endInclusive.toString(),
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 200.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = greenRange.endInclusive.toString(),
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 60.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+            Canvas(modifier = Modifier
+                .fillMaxWidth()
+                .height(trackHeight.dp)
+                .align(Alignment.CenterStart)
+            ) {
+                val width = size.width
+                val blueWidth = (blueRange.endInclusive / totalRange) * width
+                val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
+                val orangeWidth = ((orangeRange.endInclusive - orangeRange.start) / totalRange) * width
+
+                // Draw the first part of the track (red)
+                drawLine(
+                    color = blue,
+                    start = androidx.compose.ui.geometry.Offset(0f, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+
+                // Draw the second part of the track (green)
+                drawLine(
+                    color = green,
+                    start = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+
+                // Draw the third part of the track (magenta)
+                drawLine(
+                    color = orange,
+                    start = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth + orangeWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 38.dp)
+            ) {
+                Text(
+                    text = blueText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 30.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = greenText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 180.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = orangeText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 40.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Draw the Slider
+            Slider(
+                value = value,
+                onValueChange = onValueChange,
+                valueRange = 0f..totalRange,  // Set the total range for the slider
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterStart),
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.Gray,
+                    activeTrackColor = Color.Transparent,
+                    inactiveTrackColor = Color.Transparent
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun MusclePercentSlider(
+    modifier: Modifier = Modifier,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    blueRange: ClosedFloatingPointRange<Float>,
+    greenRange: ClosedFloatingPointRange<Float>,
+    darkGreenRange: ClosedFloatingPointRange<Float>,
+    blueText:String,
+    greenText:String,
+    darkGreenText:String,
+    trackHeight: Float = 32f
+) {
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        val blue = colorResource(id = R.color.Slider_Blue)
+        val green = colorResource(id = R.color.Slider_Green)
+        val darkGreen= colorResource(id = R.color.Slider_DarkGreen)
+        val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (darkGreenRange.endInclusive - darkGreenRange.start)
+
+        Box(
+            modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = blueRange.endInclusive.toString(),
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 230.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = greenRange.endInclusive.toString(),
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(end = 50.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+            Canvas(modifier = Modifier
+                .fillMaxWidth()
+                .height(trackHeight.dp)
+                .align(Alignment.CenterStart)
+            ) {
+                val width = size.width
+                val blueWidth = (blueRange.endInclusive / totalRange) * width
+                val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
+                val orangeWidth = ((darkGreenRange.endInclusive - darkGreenRange.start) / totalRange) * width
+
+                // Draw the first part of the track (red)
+                drawLine(
+                    color = blue,
+                    start = androidx.compose.ui.geometry.Offset(0f, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+
+                // Draw the second part of the track (green)
+                drawLine(
+                    color = green,
+                    start = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+
+                // Draw the third part of the track (magenta)
+                drawLine(
+                    color = darkGreen,
+                    start = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth + orangeWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 38.dp)
+            ) {
+                Text(
+                    text = blueText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 100.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = greenText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 100.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = darkGreenText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.
+                    padding(start = 20.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Draw the Slider
+            Slider(
+                value = value,
+                onValueChange = onValueChange,
+                valueRange = 0f..totalRange,  // Set the total range for the slider
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterStart),
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.Gray,
+                    activeTrackColor = Color.Transparent,
+                    inactiveTrackColor = Color.Transparent
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun VisceralFatIndexSlider(
+    modifier: Modifier = Modifier,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    greenRange: ClosedFloatingPointRange<Float>,
+    orangeRange: ClosedFloatingPointRange<Float>,
+    redRange: ClosedFloatingPointRange<Float>,
+    greenText:String,
+    orangeText:String,
+    redText:String,
+    trackHeight: Float = 32f
+) {
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        val green = colorResource(id = R.color.Slider_Green)
+        val orange= colorResource(id = R.color.Slider_Orange)
+        val totalRange = greenRange.endInclusive + (orangeRange.endInclusive - orangeRange.start) + (redRange.endInclusive - redRange.start)
+
+        Box(
+            modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                Text(
+                    text = greenRange.endInclusive.toString(),
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(start = 130.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = orangeRange.endInclusive.toString(),
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(start = 70.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+            Canvas(modifier = Modifier
+                .fillMaxWidth()
+                .height(trackHeight.dp)
+                .align(Alignment.CenterStart)
+            ) {
+                val width = size.width
+                val blueWidth = (greenRange.endInclusive / totalRange) * width
+                val greenWidth = ((orangeRange.endInclusive - orangeRange.start) / totalRange) * width
+                val orangeWidth = ((redRange.endInclusive - redRange.start) / totalRange) * width
+
+                // Draw the first part of the track (red)
+                drawLine(
+                    color = green,
+                    start = androidx.compose.ui.geometry.Offset(0f, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+
+                // Draw the second part of the track (green)
+                drawLine(
+                    color = orange,
+                    start = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+
+                // Draw the third part of the track (magenta)
+                drawLine(
+                    color = Color.Red,
+                    start = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth + orangeWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 38.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = greenText,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(start = 40.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = orangeText,
+                    fontSize = 14.sp,
+                    modifier = Modifier,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = redText,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(end = 30.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Draw the Slider
+            Slider(
+                value = value,
+                onValueChange = onValueChange,
+                valueRange = 0f..totalRange,  // Set the total range for the slider
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterStart),
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.Gray,
+                    activeTrackColor = Color.Transparent,
+                    inactiveTrackColor = Color.Transparent
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun SubcutaneousFatSlider(
+    modifier: Modifier = Modifier,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    blueRange: ClosedFloatingPointRange<Float>,
+    greenRange: ClosedFloatingPointRange<Float>,
+    orangeRange: ClosedFloatingPointRange<Float>,
+    blueText:String,
+    greenText:String,
+    orangeText:String,
+    trackHeight: Float = 32f
+) {
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        val blue = colorResource(id = R.color.Slider_Blue)
+        val green = colorResource(id = R.color.Slider_Green)
+        val orange= colorResource(id = R.color.Slider_Orange)
+        val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (orangeRange.endInclusive - orangeRange.start)
+
+        Box(
+            modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = blueRange.endInclusive.toString(),
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(start = 100.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = greenRange.endInclusive.toString(),
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(end = 90.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+            Canvas(modifier = Modifier
+                .fillMaxWidth()
+                .height(trackHeight.dp)
+                .align(Alignment.CenterStart)
+            ) {
+                val width = size.width
+                val blueWidth = (blueRange.endInclusive / totalRange) * width
+                val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
+                val orangeWidth = ((orangeRange.endInclusive - orangeRange.start) / totalRange) * width
+
+                // Draw the first part of the track (red)
+                drawLine(
+                    color = blue,
+                    start = androidx.compose.ui.geometry.Offset(0f, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+
+                // Draw the second part of the track (green)
+                drawLine(
+                    color = green,
+                    start = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+
+                // Draw the third part of the track (magenta)
+                drawLine(
+                    color = orange,
+                    start = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth + orangeWidth, center.y),
+                    strokeWidth = trackHeight,
+                    cap = StrokeCap.Round
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 38.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = blueText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = greenText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = orangeText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Draw the Slider
+            Slider(
+                value = value,
+                onValueChange = onValueChange,
+                valueRange = 0f..totalRange,  // Set the total range for the slider
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterStart),
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.Gray,
+                    activeTrackColor = Color.Transparent,
+                    inactiveTrackColor = Color.Transparent
+                )
+            )
+        }
+    }
+}
+
+
 
 
 @Preview(showBackground = true)
@@ -1277,5 +1932,85 @@ fun BMRSliderPreview() {
         blueText = "Low",
         greenText = "Good",
         darkGreenText = "Excellent"
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BonePercentSliderPreview() {
+    var sliderValue by remember { mutableStateOf(0f) }
+    BonePercentSlider(
+        value = sliderValue,
+        onValueChange = { sliderValue = it },
+        blueRange = 0f..3.7f,  // Define the maximum value for the red range
+        greenRange = 3.7f..4.1f,  // Define the maximum value for the green range
+        darkGreenRange = 4.1f..6f,  // Define the maximum value for the magenta range
+        blueText = "Low",
+        greenText = "Standard",
+        darkGreenText = "Excellent"
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProteinPercentSliderPreview() {
+    var sliderValue by remember { mutableStateOf(0f) }
+    ProteinPercentSlider(
+        value = sliderValue,
+        onValueChange = { sliderValue = it },
+        blueRange = 0f..16f,  // Define the maximum value for the red range
+        greenRange = 16f..20.1f,  // Define the maximum value for the green range
+        orangeRange = 20.1f..25f,  // Define the maximum value for the magenta range
+        blueText = "Low",
+        greenText = "Standard",
+        orangeText = "High"
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MusclePercentSliderPreview() {
+    var sliderValue by remember { mutableStateOf(0f) }
+    MusclePercentSlider(
+        value = sliderValue,
+        onValueChange = { sliderValue = it },
+        blueRange = 0f..73f,  // Define the maximum value for the red range
+        greenRange = 73f..81f,  // Define the maximum value for the green range
+        darkGreenRange = 81f..100f,  // Define the maximum value for the magenta range
+        blueText = "Low",
+        greenText = "Standard",
+        darkGreenText = "Excellent"
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun VisceralFatIndexSliderPreview() {
+    var sliderValue by remember { mutableStateOf(0f) }
+    VisceralFatIndexSlider(
+        value = sliderValue,
+        onValueChange = { sliderValue = it },
+        greenRange = 0f..10f,  // Define the maximum value for the red range
+        orangeRange = 10f..17f,  // Define the maximum value for the green range
+        redRange = 17f..25f,  // Define the maximum value for the magenta range
+        greenText = "Standard",
+        orangeText = "High",
+        redText = "Over"
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SubcutaneousFatPreview() {
+    var sliderValue by remember { mutableStateOf(0f) }
+    SubcutaneousFatSlider(
+        value = sliderValue,
+        onValueChange = { sliderValue = it },
+        blueRange = 0f..5f,  // Define the maximum value for the red range
+        greenRange = 5f..10.5f,  // Define the maximum value for the green range
+        orangeRange = 10.5f..15f,  // Define the maximum value for the magenta range
+        blueText = "Low",
+        greenText = "Standard",
+        orangeText = "High"
     )
 }
