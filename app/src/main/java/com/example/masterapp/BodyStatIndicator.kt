@@ -1,5 +1,6 @@
 package com.example.masterapp
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -9,9 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -23,9 +27,9 @@ fun CustomSlider3(
     blueRange: ClosedFloatingPointRange<Float>,
     greenRange: ClosedFloatingPointRange<Float>,
     orangeRange: ClosedFloatingPointRange<Float>,
-    blueText:String,
-    greenText:String,
-    orangeText:String,
+    blueText: String,
+    greenText: String,
+    orangeText: String,
     trackHeight: Float = 32f
 ) {
     Column(
@@ -35,8 +39,9 @@ fun CustomSlider3(
     ) {
         val blue = colorResource(id = R.color.Slider_Blue)
         val green = colorResource(id = R.color.Slider_Green)
-        val orange= colorResource(id = R.color.Slider_Orange)
+        val orange = colorResource(id = R.color.Slider_Orange)
         val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (orangeRange.endInclusive - orangeRange.start)
+
 
         Box(
             modifier = Modifier
@@ -47,20 +52,26 @@ fun CustomSlider3(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+//                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = blueRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
+                Row (Modifier.fillMaxWidth(0.3f),
+                    horizontalArrangement = Arrangement.End){
+                    Text(
+                        text = blueRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row (Modifier.fillMaxWidth(0.6f),
+                    horizontalArrangement = Arrangement.End) {
+                    Text(
+                        text = greenRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
             Canvas(modifier = Modifier
                 .fillMaxWidth()
@@ -72,7 +83,6 @@ fun CustomSlider3(
                 val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
                 val orangeWidth = ((orangeRange.endInclusive - orangeRange.start) / totalRange) * width
 
-                // Draw the first part of the track (red)
                 drawLine(
                     color = blue,
                     start = androidx.compose.ui.geometry.Offset(0f, center.y),
@@ -81,7 +91,6 @@ fun CustomSlider3(
                     cap = StrokeCap.Round
                 )
 
-                // Draw the second part of the track (green)
                 drawLine(
                     color = green,
                     start = androidx.compose.ui.geometry.Offset(blueWidth, center.y),
@@ -90,7 +99,6 @@ fun CustomSlider3(
                     cap = StrokeCap.Round
                 )
 
-                // Draw the third part of the track (magenta)
                 drawLine(
                     color = orange,
                     start = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
@@ -108,28 +116,24 @@ fun CustomSlider3(
                 Text(
                     text = blueText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = orangeText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
             }
 
-            // Draw the Slider
             Slider(
                 value = value,
                 onValueChange = onValueChange,
-                valueRange = 0f..totalRange,  // Set the total range for the slider
+                valueRange = 0f..totalRange,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterStart),
@@ -142,6 +146,7 @@ fun CustomSlider3(
         }
     }
 }
+
 
 @Composable
 fun BodyWaterPercentSlider(
@@ -174,23 +179,26 @@ fun BodyWaterPercentSlider(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(top = 8.dp)
             ) {
-                Text(
-                    text = blueRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(start = 120.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(end = 135.dp),
-                    textAlign = TextAlign.Center
-                )
+                Row (Modifier.fillMaxWidth(0.4f),
+                    horizontalArrangement = Arrangement.End){
+                    Text(
+                        text = blueRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row (Modifier.fillMaxWidth(0.4f),
+                    horizontalArrangement = Arrangement.End) {
+                    Text(
+                        text = greenRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
             Canvas(modifier = Modifier
                 .fillMaxWidth()
@@ -238,19 +246,22 @@ fun BodyWaterPercentSlider(
                 Text(
                     text = blueText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .padding(start = 30.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .padding(start = 16.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = orangeText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .padding(end = 50.dp),
                     textAlign = TextAlign.Center
                 )
             }
@@ -315,19 +326,22 @@ fun CustomSlider4(
                 Text(
                     text = blueRange.endInclusive.toString(),
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1.8f),
+                    modifier = Modifier
+                        .padding(start = 70.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenRange.endInclusive.toString(),
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(0.9f),
+                    modifier = Modifier
+                        .padding(start = 60.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = orangeRange.endInclusive.toString(),
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1.8f),
+                    modifier = Modifier
+                        .padding(start = 50.dp),
                     textAlign = TextAlign.Center
                 )
             }
@@ -388,25 +402,25 @@ fun CustomSlider4(
                 Text(
                     text = blueText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(start = 20.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier =Modifier.padding(start = 10.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = orangeText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(end = 30.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = redText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(end = 40.dp),
                     textAlign = TextAlign.Center
                 )
             }
@@ -460,6 +474,8 @@ fun BodyFatPercentSlider(
                 (orangeRange.endInclusive - orangeRange.start) +
                 (redRange.endInclusive - redRange.start)
 
+
+
         Box(
             modifier = Modifier
                 .height(60.dp)
@@ -470,27 +486,33 @@ fun BodyFatPercentSlider(
                     .fillMaxWidth()
                     .padding(top = 8.dp)
             ) {
-                Text(
-                    text = blueRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(start = 48.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(start = 120.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = orangeRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(start = 28.dp),
-                    textAlign = TextAlign.Center
-                )
+                Row (Modifier.fillMaxWidth(0.1578f),
+                    horizontalArrangement = Arrangement.End){
+                    Text(
+                        text = blueRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row (Modifier.fillMaxWidth(0.5189f),
+                    horizontalArrangement = Arrangement.End){
+                    Text(
+                        text = greenRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row (Modifier.fillMaxWidth(0.6105f),
+                    horizontalArrangement = Arrangement.End){
+                    Text(
+                        text = orangeRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
             Canvas(
                 modifier = Modifier
@@ -549,25 +571,29 @@ fun BodyFatPercentSlider(
                 Text(
                     text = blueText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .padding(start = 15.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .padding(),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = orangeText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .padding(),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = redText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier =Modifier
+                        .padding(end = 30.dp),
                     textAlign = TextAlign.Center
                 )
             }
@@ -629,13 +655,13 @@ fun CustomSlider3Green(
                 Text(
                     text = blueRange.endInclusive.toString(),
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(start = 100.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenRange.endInclusive.toString(),
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(end = 100.dp),
                     textAlign = TextAlign.Center
                 )
             }
@@ -685,19 +711,19 @@ fun CustomSlider3Green(
                 Text(
                     text = blueText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(start = 50.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = darkGreenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(end = 50.dp),
                     textAlign = TextAlign.Center
                 )
             }
@@ -756,29 +782,30 @@ fun BMISlider(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Spacer(modifier = Modifier.padding(horizontal = 85.dp))
-                Text(
-                    text = blueRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-//                    modifier = Modifier.weight(4f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.padding(horizontal = 20.dp))
+                Row (Modifier.fillMaxWidth(0.5f),
+                    horizontalArrangement = Arrangement.End){
+                    Text(
+                        text = blueRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
                 Text(
                     text = greenRange.endInclusive.toString(),
                     fontSize = 14.sp,
-//                    modifier = Modifier.weight(0.2f),
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.padding(horizontal = 20.dp))
-                Text(
-                    text = orangeRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-//                    modifier = Modifier.weight(1.8f),
-                    textAlign = TextAlign.Center
-                )
+                Row (horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.fillMaxWidth(0.3f)){
+                    Text(
+                        text = orangeRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
             Canvas(
                 modifier = Modifier
@@ -831,36 +858,34 @@ fun BMISlider(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 38.dp)
+                    .padding(top = 38.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Spacer(modifier = Modifier.padding(horizontal = 20.dp))
                 Text(
                     text = blueText,
-                    fontSize = 14.sp,
-//                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.padding(horizontal = 35.dp))
-                Text(
-                    text = greenText,
-                    fontSize = 14.sp,
-//                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
-                Text(
-                    text = orangeText,
-                    fontSize = 14.sp,
-//                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.padding(horizontal = 9.dp))
-                Text(
-                    text = redText,
                     fontSize = 12.sp,
-//                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(2f)
                 )
+                Row (Modifier.fillMaxWidth(0.5f),
+                    horizontalArrangement = Arrangement.SpaceBetween){
+
+                    Text(
+                        text = greenText,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = orangeText,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = redText,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
 
@@ -914,22 +939,25 @@ fun LeanBodyMassPercentSlider(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = blueRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(start = 220.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(start = 70.dp),
-                    textAlign = TextAlign.Center
-                )
+                Row (Modifier.fillMaxWidth(0.65f),
+                    horizontalArrangement = Arrangement.End){
+                    Text(
+                        text = blueRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row(Modifier.fillMaxWidth(0.4f),
+                    horizontalArrangement = Arrangement.Start) {
+                    Text(
+                        text = greenRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Start
+                    )
+                }
             }
             Canvas(modifier = Modifier
                 .fillMaxWidth()
@@ -972,27 +1000,34 @@ fun LeanBodyMassPercentSlider(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 38.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+//                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = blueText,
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenText,
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(end = 24.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = orangeText,
-                    fontSize = 14.sp,
-                    modifier = Modifier,
-                    textAlign = TextAlign.Center
-                )
+                Row (Modifier.fillMaxWidth()) {
+                        Text(
+                            text = blueText,
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .weight(2f),
+                            textAlign = TextAlign.Center
+                        )
+                    Row (Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.SpaceEvenly){
+                        Text(
+                            text = greenText,
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .weight(1f),
+                            textAlign = TextAlign.Center
+                        )
+
+                        Text(
+                            text = orangeText,
+                            fontSize = 14.sp,
+                            modifier = Modifier,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
 
             // Draw the Slider
@@ -1047,20 +1082,24 @@ fun BMRSlider(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = blueRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f)
-                        .padding(start = 90.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f)
-                        .padding(end = 100.dp),
-                    textAlign = TextAlign.Center
-                )
+                Row(horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth(0.45f)) {
+                    Text(
+                        text = blueRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.fillMaxWidth(0.85f)) {
+                    Text(
+                        text = greenRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
             Canvas(modifier = Modifier
                 .fillMaxWidth()
@@ -1108,19 +1147,19 @@ fun BMRSlider(
                 Text(
                     text = blueText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(start = 50.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(start =40.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = darkGreenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(end = 50.dp),
                     textAlign = TextAlign.Center
                 )
             }
@@ -1763,19 +1802,19 @@ fun SubcutaneousFatSlider(
                 Text(
                     text = blueText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(start = 40.dp),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = orangeText,
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(end = 40.dp),
                     textAlign = TextAlign.Center
                 )
             }
@@ -1808,9 +1847,9 @@ fun CustomSlider3Preview() {
     CustomSlider3(
         value = sliderValue,
         onValueChange = { sliderValue = it },
-        blueRange = 0f..50f,  // Define the maximum value for the red range
-        greenRange = 50f..100f,  // Define the maximum value for the green range
-        orangeRange = 100f..150f,  // Define the maximum value for the magenta range
+        blueRange = 0f..40f,  // Define the maximum value for the red range
+        greenRange = 40f..80f,  // Define the maximum value for the green range
+        orangeRange = 80f..120f,  // Define the maximum value for the magenta range
         blueText = "Low",
         greenText = "Standard",
         orangeText = "High"

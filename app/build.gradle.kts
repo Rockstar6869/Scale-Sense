@@ -56,6 +56,11 @@ dependencies {
 
     val nav_version = "2.7.5"
     val compose_version = "1.6.0-alpha08"
+
+    implementation ("androidx.fragment:fragment:1.3.0")
+
+    implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation ("androidx.compose.animation:animation:1.3.1")
     implementation ("com.google.accompanist:accompanist-navigation-animation:0.30.1")// for animated navigation
@@ -86,11 +91,11 @@ dependencies {
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.media3.common)
     implementation(libs.androidx.navigation.runtime.ktx)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
+//    testImplementation(libs.junit)
+//    androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+//    androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

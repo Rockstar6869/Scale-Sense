@@ -23,6 +23,8 @@ sealed class Screen(val title:String,val route:String){
 sealed class ScreenInMeScreen(val atitle:String,val aroute:String,@DrawableRes val icon:Int):Screen(atitle, aroute){
     object MyDevices:ScreenInMeScreen("My Devices","mydevices",R.drawable.baseline_monitor_weight_24)
     object UpdateDetails:ScreenInMeScreen("Update Details","updatedetails",R.drawable.baseline_update_24)
+    object ChangePassword:ScreenInMeScreen("Change Password","changepassword",R.drawable.baseline_password_24)
+    object Unit:ScreenInMeScreen("Unit","unitscreen",R.drawable.kg_weight)
 }
 
 

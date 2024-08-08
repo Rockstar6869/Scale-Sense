@@ -13,7 +13,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import co.yml.charts.common.extensions.isNotNull
 import java.text.SimpleDateFormat
 
 @Composable
@@ -37,28 +40,62 @@ fun UpdateDetailScreen(userDetailsViewModel: UserDetailsViewModel = viewModel(),
     var age by remember { mutableStateOf("") }
     var height by remember { mutableStateOf("") }
 
+    var feet by remember { mutableStateOf("") }
+    var inch by remember { mutableStateOf("") }
+
+    var convertedHeightToCm by remember { mutableStateOf("") }
+
     val genderOptions = listOf("Male", "Female")
     var expanded by remember { mutableStateOf(false) }
+
+    val currentUserDetails by userDetailsViewModel.userData.observeAsState()
+    val userUnits by userDetailsViewModel.units.observeAsState()
+    var heightUnit by remember { mutableStateOf("") }
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
+    LaunchedEffect(currentUserDetails) {
+        if(currentUserDetails.isNotNull()){
+            gender = currentUserDetails!!.gender
+            age = currentUserDetails!!.age.toString()
+            height = currentUserDetails!!.heightincm.toString()
+        }
+    }
+    LaunchedEffect(userUnits) {
+        if(userUnits.isNotNull()){
+            heightUnit = userUnits!!.heightunit
+        }
+    }
+    LaunchedEffect(currentUserDetails,userUnits,heightUnit) {
+        if(userUnits.isNotNull() && currentUserDetails.isNotNull()){
+            if(heightUnit == "in"){
+                val(convertedFeet, convertedInch) = Calculate.convertCmToFeetAndInches(height.toDouble())
+                feet = convertedFeet.toString()
+                inch = convertedInch.format(2)
+            }
+        }
+    }
 
-    Box (Modifier.fillMaxSize()) {
+
+    Box (
+        Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                })
+            }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 140.dp)
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        keyboardController?.hide()
-                        focusManager.clearFocus()
-                    })
-                },
+                .padding(horizontal = 16.dp, vertical = 140.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
+                Spacer(modifier = Modifier.height(40.dp))
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         Modifier
@@ -81,26 +118,64 @@ fun UpdateDetailScreen(userDetailsViewModel: UserDetailsViewModel = viewModel(),
                     }
 
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Divider(color = Color.LightGray, thickness = 0.9.dp)
+                Spacer(modifier = Modifier.height(8.dp))
                 UserDetailTextField(
+                    modifier = Modifier.fillMaxWidth(),
                     value = age,
                     onValueChange = { age = it },
                     label = "Age",
                     visualTransformation = VisualTransformation.None,
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Divider(color = Color.LightGray, thickness = 0.9.dp)
-                UserDetailTextField(
-                    value = height,
-                    onValueChange = { height = it },
-                    label = "Height(CM)",
-                    visualTransformation = VisualTransformation.None,
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Divider(color = Color.LightGray, thickness = 0.8.dp)
+
+                if(heightUnit == "" || heightUnit == "cm") {
+                    UserDetailTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = height,
+                        onValueChange = { height = it },
+                        label = "Height(CM)",
+                        visualTransformation = VisualTransformation.None,
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Divider(color = Color.LightGray, thickness = 0.8.dp)
+                }
+                else if(heightUnit == "in"){
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween // Spacing between text fields
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f)
+                                .padding(end = 10.dp)
+                        ) {
+                            UserDetailTextField(
+                                value = feet,
+                                onValueChange = { feet = it },
+                                label = "Feet"
+                            )
+                            HorizontalDivider(color = Color.LightGray, thickness = 0.8.dp)
+                        }
+                        Column(
+                            modifier = Modifier.weight(1f)
+                                .padding(start = 10.dp)
+                        ) {
+                            UserDetailTextField(
+                                value = inch,
+                                onValueChange = { inch = it },
+                                label = "In"
+                            )
+                            HorizontalDivider(color = Color.LightGray, thickness = 0.8.dp)
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
@@ -119,10 +194,16 @@ fun UpdateDetailScreen(userDetailsViewModel: UserDetailsViewModel = viewModel(),
             }
             Button(
                 onClick = {
-                    if(age.isNotBlank() && gender.isNotBlank() && height.isNotBlank()) {
+                    if(height.isNotBlank() && (heightUnit == "" || heightUnit== "cm") && isDouble(height)){
+                        convertedHeightToCm = height
+                    }
+                    else if((feet.isNotBlank() && inch.isNotBlank()) && heightUnit == "in" && (isInteger(feet) && isDouble(inch))){
+                        convertedHeightToCm = (Calculate.convertFeetAndInchesToCm(feet.toInt(),inch.toDouble())).toString()
+                    }
+                    if(age.isNotBlank() && gender.isNotBlank() && convertedHeightToCm.isNotBlank() && isInteger(age)) {
                         userDetailsViewModel.uploadDetails(
                             ud = UserData(
-                                height.toDouble(),
+                                convertedHeightToCm.toDouble(),
                                 gender = gender,
                                 age = age.toInt()
                             )

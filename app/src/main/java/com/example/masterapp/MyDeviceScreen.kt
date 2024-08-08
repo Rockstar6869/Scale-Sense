@@ -19,6 +19,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -33,12 +34,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.delay
+
 @Composable
 fun MyDeviceScreen(onNavBackClicked:()->Unit,
                    onAddDeviceClicked:()->Unit,
                    userDetailsViewModel: UserDetailsViewModel = viewModel()
 ) {
     val devices by userDetailsViewModel.devices.observeAsState()
+    LaunchedEffect(true) {
+        delay(1000)
+        userDetailsViewModel.getDeviceList()
+    }
     Scaffold(
         topBar = {
             TopAppBar(

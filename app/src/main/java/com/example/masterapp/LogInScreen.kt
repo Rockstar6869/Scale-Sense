@@ -109,9 +109,12 @@ fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLog
                     }
 
                     is Result.Error -> {
+                        val exceptionMessage = if( (((result as Result.Error).exception.message)?.startsWith("The supplied auth credential is incorrect"))?:false)
+                            "Incorrect email or password"
+                            else (result as Result.Error).exception?.message
                         Toast.makeText(
                             context,
-                            "${(result as Result.Error).exception?.message}",
+                            "$exceptionMessage",
                             Toast.LENGTH_SHORT
                         ).show()
                         loading = false

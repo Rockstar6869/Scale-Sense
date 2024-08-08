@@ -2,8 +2,11 @@ package com.example.masterapp
 
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
@@ -16,11 +19,21 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun BottomScreenUpdateDetails(onNavigateToMeScreen:()->Unit){
+fun BottomScreenUpdateDetails(onNavigateToMeScreen:()->Unit,
+                              userDetailsViewModel: UserDetailsViewModel){
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Update Details")},
+                title = {
+                    Row (
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(end = 70.dp)
+                        , horizontalArrangement = Arrangement.Center){
+                        Text(text = "Update Details",
+                            color = Color.Black)
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { onNavigateToMeScreen()}) {
                         Icon(
@@ -32,13 +45,13 @@ fun BottomScreenUpdateDetails(onNavigateToMeScreen:()->Unit){
                 modifier = Modifier
                     .height(80.dp)
                     .padding(top = 25.dp),
-                elevation = 8.dp)
+                elevation = 0.dp)
         },
 content = {
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(it)) {
-        UpdateDetailScreen {
+        UpdateDetailScreen(userDetailsViewModel) {
             onNavigateToMeScreen()
         }
     }

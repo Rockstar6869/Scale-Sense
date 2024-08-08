@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +21,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.jaikeerthick.composable_graphs.composables.line.model.LineData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
@@ -29,6 +32,12 @@ fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
     var backPressedTime by remember { mutableStateOf(0L) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    LaunchedEffect(true){
+        withContext(Dispatchers.IO) {
+            userDetailsViewModel.gethistlist()
+            userDetailsViewModel.getUnits()
+        }
+    }
     NavHost(navController = navController as NavHostController,
         startDestination = Screen.BottomScreen.HomeScreen.route ){
 
@@ -47,7 +56,8 @@ fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
         }
 
                 HomeScreen( bleScanViewModel =  bluetoothViewModel,
-                    onNavigateToHealthReport = {navController.navigate(Screen.HealthReportScreen.route)})
+                    onNavigateToHealthReport = {navController.navigate(Screen.HealthReportScreen.route)},
+                    userDetailsViewModel = userDetailsViewModel)
         }
         composable(Screen.BottomScreen.HistoryScreen.route,
 //            enterTransition =  {slideInHorizontally() }
@@ -61,7 +71,7 @@ fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
                     onExit = { (navController.context as? Activity)?.finish() }
                 )
             }
-            HistoryScreen()
+            HistoryScreen(userDetailsViewModel)
         }
         composable(Screen.BottomScreen.MeScreen.route,
 //            enterTransition =  {slideInHorizontally() }
@@ -77,25 +87,38 @@ fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
             }
             MyProfileScreen(onMyDevicesClick = {navController.navigate(ScreenInMeScreen.MyDevices.route)},
                             onUpdateDetailsClick = {navController.navigate(Screen.BottomScreenUpdateDetails.route)},
+                            onChangePasswordClick = {navController.navigate(ScreenInMeScreen.ChangePassword.route)},
+                            onUnitClick = {navController.navigate(ScreenInMeScreen.Unit.route)},
                             onLogOutSuccess = onLogOutSuccess,
-                            authViewModel = authViewModel)
+                            authViewModel = authViewModel,
+                            userDetailsViewModel = userDetailsViewModel)
         }
         composable(ScreenInMeScreen.MyDevices.route){
             MyDeviceScreen(onNavBackClicked = {navController.navigate(Screen.BottomScreen.MeScreen.route) },
-                onAddDeviceClicked = {navController.navigate(Screen.BottomScreenAddDevice.route)})
+                onAddDeviceClicked = {navController.navigate(Screen.BottomScreenAddDevice.route)},
+                userDetailsViewModel = userDetailsViewModel)
         }
         composable(Screen.BottomScreenAddDevice.route){
-            BottomScreenAddDevice {
+            BottomScreenAddDevice(userDetailsViewModel = userDetailsViewModel) {
                 navController.navigate(ScreenInMeScreen.MyDevices.route)
             }
         }
         composable(Screen.BottomScreenUpdateDetails.route){
-            BottomScreenUpdateDetails {
-                navController.navigate(Screen.BottomScreen.MeScreen.route)
-            }
+            BottomScreenUpdateDetails (userDetailsViewModel = userDetailsViewModel,
+                onNavigateToMeScreen = { navController.navigate(Screen.BottomScreen.MeScreen.route)
+                    userDetailsViewModel.updateUserData()})
         }
         composable(Screen.HealthReportScreen.route){
-            HealthReportScreen(onBackClick = { navController.navigate(Screen.BottomScreen.HomeScreen.route) })
+            HealthReportScreen(onBackClick = { navController.navigate(Screen.BottomScreen.HomeScreen.route) },
+                userDetailsViewModel = userDetailsViewModel)
+        }
+        composable(ScreenInMeScreen.ChangePassword.route){
+            ChangePasswordScreen(authViewModel = authViewModel,
+                                onChangePasswordSuccess = {navController.navigate(Screen.BottomScreen.MeScreen.route)})
+        }
+        composable(ScreenInMeScreen.Unit.route){
+            UnitScreen(userDetailsViewModel = userDetailsViewModel,
+                onNavigateToMeScreen = {navController.navigate(Screen.BottomScreen.MeScreen.route)})
         }
     }
 

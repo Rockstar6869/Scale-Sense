@@ -12,8 +12,19 @@ object Calculate {
         val cmPerInch = 2.54
         return (totalInches * cmPerInch).format(2).toDouble()
     }
+
+    fun convertCmToFeetAndInches(cm: Double): Pair<Int, Double> {
+        val totalInches = cm / 2.54
+        val feet = (totalInches / 12).toInt()
+        val inches = totalInches % 12
+        return Pair(feet, inches)
+    }
     fun convertpoundsToKilograms(pounds: Double): Double {
         return (pounds / 2.20462).format(2).toDouble()
+    }
+    fun convertKgToPounds(kg: Double): Double {
+        val conversionFactor = 2.20462
+        return (kg * conversionFactor).format(2).toDouble()
     }
 
     fun BMI(HeightInCM:Double,WeightInKG:Double): Double{
@@ -36,7 +47,7 @@ object Calculate {
             return (weight*(BodyFatPercent/100)).format(2).toDouble()
     }
     fun BodyFatPercentforFemale(Age:Int,BMI:Double):Double{
-        return (1.20*BMI*0.23*Age-5.4).format(2).toDouble()
+        return (1.20*BMI + 0.23*Age-5.4).format(2).toDouble()
     }
     fun LeanBodyMass(Weight:Double,BodyFatPercent: Double):Double{
         val BodyFat = BodyFat(Weight,BodyFatPercent)
@@ -66,4 +77,24 @@ object Calculate {
         return (-1.097+0.05373*Age+0.03755*HeightInCM+0.6919*1.1).format(2).toDouble()
     }
 }
+
+
+fun isInteger(input: String): Boolean {
+    return try {
+        input.toInt()
+        true
+    } catch (e: NumberFormatException) {
+        false
+    }
+}
+
+fun isDouble(input: String): Boolean {
+    return try {
+        input.toDouble()
+        true
+    } catch (e: NumberFormatException) {
+        false
+    }
+}
+
 

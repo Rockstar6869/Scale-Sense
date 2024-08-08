@@ -3,7 +3,7 @@ package com.example.masterapp
 import androidx.annotation.DrawableRes
 
 sealed class Tab(val title:String,@DrawableRes val icon:Int){
-    object Weight:Tab("Weight",R.drawable.baseline_monitor_weight_24)
+    object Weight:Tab("Weight",R.drawable.weight)
     object BMI:Tab("BMI",R.drawable.calculator)
     object BodyWaterPercent:Tab("Body Water%",R.drawable.baseline_water_drop_24)
     object BodyFatPercent:Tab("Body Fat%",R.drawable.google_fit)

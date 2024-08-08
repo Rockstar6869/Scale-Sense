@@ -177,7 +177,7 @@ fun AddDevice(bleScanViewModel: BleScanViewModel = viewModel(),
         Card(
             modifier = Modifier
                 .padding(16.dp)
-                .height(800.dp),
+                .fillMaxHeight(),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Column(

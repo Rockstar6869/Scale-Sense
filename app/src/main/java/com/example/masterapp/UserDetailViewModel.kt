@@ -17,6 +17,8 @@ class UserDetailsViewModel: ViewModel() {
     val userHist: LiveData<List<hist>> get() = _userHist
     private val _devices = MutableLiveData<List<themistoscale>>()
     val devices: LiveData<List<themistoscale>> get() = _devices
+    private val _units = MutableLiveData<Units>()
+    val units: LiveData<Units> get() = _units
     private val _currentUser = MutableLiveData<User>()
     val currentUser: LiveData<User> get() = _currentUser
 
@@ -36,7 +38,9 @@ class UserDetailsViewModel: ViewModel() {
                 is Result.Success -> {
                     getUserData(currentUser.value?.email)
                 }
-                is Result.Error -> {}
+                is Result.Error -> {
+
+                }
             }
         }
 
@@ -64,6 +68,7 @@ class UserDetailsViewModel: ViewModel() {
                 is Result.Success -> {
                     _currentUser.value = result.data
                     getUserData(currentUser.value?.email)
+                    getUnits()
                     Log.d("UjTag12","${currentUser.value?.email}")
                     gethistlist()
                     getDeviceList()
@@ -82,6 +87,12 @@ class UserDetailsViewModel: ViewModel() {
                 UserDetailRepository.updatehistlist(currentUser.value!!.email, newHist)
             }
 //            getweightlist()
+        }
+    }
+
+    fun updateUserData() {
+        viewModelScope.launch {
+            getUserData(currentUser.value?.email)
         }
     }
 
@@ -120,6 +131,36 @@ class UserDetailsViewModel: ViewModel() {
         }
 
 
+    }
+    fun clearUserDataAndHist() {
+        _userData.value = UserData(heightincm = 0.0, gender = "", age = 0)
+        _userHist.value = emptyList()
+    }
+
+    fun uploadUnit(ut:Units){
+        viewModelScope.launch {
+            when (UserDetailRepository.uploadUnit(currentUser.value?.email?:"",ut)) {
+                is Result.Success -> {
+                    getUnits()
+                }
+                is Result.Error -> {}
+            }
+        }
+
+    }
+
+    fun getUnits(){
+        viewModelScope.launch {
+                when(val result = UserDetailRepository.getUnits(currentUser.value?.email?:"")){
+                    is Result.Success ->{
+                        _units.value= result.data
+                    }
+                    is Result.Error -> {
+
+                    }
+                }
+
+        }
     }
 
 

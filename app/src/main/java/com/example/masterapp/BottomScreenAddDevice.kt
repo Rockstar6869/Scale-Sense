@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun BottomScreenAddDevice(bleScanViewModel: BleScanViewModel = viewModel()
+fun BottomScreenAddDevice(bleScanViewModel: BleScanViewModel = viewModel(),
+    userDetailsViewModel: UserDetailsViewModel
 ,onNavigatetoMyDevice:()->Unit){
 //    AddDevice(bleScanViewModel = bleScanViewModel) {
 //            onNavigatetoMyDevice()
@@ -40,6 +41,7 @@ fun BottomScreenAddDevice(bleScanViewModel: BleScanViewModel = viewModel()
         },
         content = {
             AddDevice(bleScanViewModel = bleScanViewModel) {
+                userDetailsViewModel.getDeviceList()
             onNavigatetoMyDevice()
     }
         }

@@ -21,12 +21,14 @@ import androidx.compose.material.Text
 import androidx.compose.material3.Icon
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun MainView(authViewModel: AuthViewModel,onLogOutSuccess:()->Unit){
+fun MainView(authViewModel: AuthViewModel,onLogOutSuccess:()->Unit,
+             userDetailsViewModel: UserDetailsViewModel = viewModel()){
     val scaffoldstate: ScaffoldState = rememberScaffoldState()
     val vm:MainViewModel= viewModel()
     //to find out our current path
@@ -41,19 +43,18 @@ fun MainView(authViewModel: AuthViewModel,onLogOutSuccess:()->Unit){
     }
     Scaffold(
         bottomBar = {
-            if(currentScreen is Screen.BottomScreen.HomeScreen){
                 BottomNavigation (modifier = Modifier.height(80.dp),
                     backgroundColor = Color.White){
                     listofbottomitems.forEach{
                         val isSelected = currentPath == it.broute
                         BottomNavigationItem(       //this is a inbuilt function
                             selected = currentScreen.route==it.broute,
-                            onClick = { if(it.broute!=vm.currentScreen.value.route){
+                            onClick = { if(it.broute!=currentPath){
                                 controller.navigate(it.broute)
                                 vm.setCurrentScreen(it)
                                 title.value=it.btitle}},
                             icon = {
-                                val tint = if (isSelected) Color.Blue else Color.Black
+                                val tint = if (isSelected) colorResource(id = R.color.Home_Screen_Blue) else Color.Black
                                     Icon(
                                         tint = tint,
                                         painter = painterResource(id = it.icon),
@@ -63,12 +64,12 @@ fun MainView(authViewModel: AuthViewModel,onLogOutSuccess:()->Unit){
                             label = {Text(text = it.title)})
                     }
                 }
-            }
         },
         scaffoldState = scaffoldstate
     ){
         BottomScreenNavigation(navController = controller, pd = it, authViewModel = authViewModel,
-            onLogOutSuccess = onLogOutSuccess)
+            onLogOutSuccess = onLogOutSuccess,
+            userDetailsViewModel = userDetailsViewModel)
     }
 
 }

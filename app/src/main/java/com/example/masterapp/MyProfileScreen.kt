@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
@@ -44,19 +45,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun MyProfileScreen(onMyDevicesClick:()->Unit,onUpdateDetailsClick:()->Unit,authViewModel: AuthViewModel,
+fun MyProfileScreen(onMyDevicesClick:()->Unit,
+                    onUpdateDetailsClick:()->Unit,authViewModel: AuthViewModel,
+                    onChangePasswordClick:()->Unit,
+                    onUnitClick:()->Unit,
                     onLogOutSuccess:()->Unit,
                     userDetailsViewModel: UserDetailsViewModel = viewModel()
-){
+) {
     var logoutclick by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
     val result by authViewModel.authResult.observeAsState()
     val context = LocalContext.current
     val userdata by userDetailsViewModel.currentUser.observeAsState()
     LaunchedEffect(logoutclick) {
-        if(logoutclick){
+        if (logoutclick) {
             loading = true
-            while(loading) {
+            while (loading) {
                 when (result) {
                     is Result.Success -> {
                         onLogOutSuccess()
@@ -82,7 +86,9 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,onUpdateDetailsClick:()->Unit,auth
             }
         }
     }
-    Column (Modifier.fillMaxSize()){
+    LazyColumn {
+        item {
+    Column(Modifier.fillMaxSize()) {
 
         Spacer(modifier = Modifier.padding(vertical = 40.dp))
         Text(
@@ -90,45 +96,65 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,onUpdateDetailsClick:()->Unit,auth
             style = MaterialTheme.typography.h5,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-        if(userdata != null) {
+        if (userdata != null) {
             UserInfoRow(
                 Email = userdata!!.email,
                 firstname = userdata!!.firstName,
                 lastname = userdata!!.lastName
             )
         }
-            Spacer(modifier = Modifier.padding(vertical = 40.dp))
+        Spacer(modifier = Modifier.padding(vertical = 40.dp))
         Divider(color = Color.LightGray, thickness = 0.9.dp)
-            ClickableRow(Icon = painterResource(id = ScreenInMeScreen.MyDevices.icon), textContent = {
-                Text(text = ScreenInMeScreen.MyDevices.title)}) {
-                onMyDevicesClick()
-            }
+        ClickableRow(Icon = painterResource(id = ScreenInMeScreen.MyDevices.icon), textContent = {
+            Text(text = ScreenInMeScreen.MyDevices.title)
+        }) {
+            onMyDevicesClick()
+        }
         Divider(color = Color.LightGray, thickness = 1.dp)
-            ClickableRow(Icon = painterResource(id = ScreenInMeScreen.UpdateDetails.icon), textContent = {Text(text = ScreenInMeScreen.UpdateDetails.title)}) {
-               onUpdateDetailsClick()
-            }
+        ClickableRow(
+            Icon = painterResource(id = ScreenInMeScreen.UpdateDetails.icon),
+            textContent = { Text(text = ScreenInMeScreen.UpdateDetails.title) }) {
+            onUpdateDetailsClick()
+        }
         Divider(color = Color.LightGray, thickness = 0.9.dp)
-            Spacer(modifier = Modifier.padding(vertical = 40.dp))
+        Spacer(modifier = Modifier.padding(vertical = 40.dp))
+        Divider(color = Color.LightGray, thickness = 0.9.dp)
+        ClickableRow(Icon = painterResource(id = ScreenInMeScreen.Unit.icon), textContent = {
+            Text(text = ScreenInMeScreen.Unit.title)
+        }) {
+            onUnitClick()
+        }
+        Divider(color = Color.LightGray, thickness = 0.9.dp)
+        Spacer(modifier = Modifier.padding(vertical = 40.dp))
         Divider(color = Color.LightGray, thickness = 0.9.dp)
         ClickableRow(Icon = painterResource(id = R.drawable.baseline_password_24), textContent = {
             Text(text = "Change Password")
         }) {
+            onChangePasswordClick()
+        }
+        Divider(color = Color.LightGray, thickness = 0.9.dp)
+        ClickableRow(
+            Icon = painterResource(id = R.drawable.baseline_logout_24), textContent = {
+                Text(
+                    text = "Log Out",
+                    color = Color.Red
+                )
+            },
+            tint = Color.Red
+        ) {
+            authViewModel.LogOut()
+            userDetailsViewModel.clearUserDataAndHist()
+            logoutclick = true
+        }
+        Divider(color = Color.LightGray, thickness = 0.9.dp)
 
-        }
-        Divider(color = Color.LightGray, thickness = 0.9.dp)
-        ClickableRow(Icon = painterResource(id = R.drawable.baseline_logout_24), textContent = { Text(
-            text = "Log Out",
-            color = Color.Red
-        )}) {
-                authViewModel.LogOut()
-                logoutclick = true
-        }
-        Divider(color = Color.LightGray, thickness = 0.9.dp)
         Spacer(modifier = Modifier.padding(vertical = 50.dp))
-        if(loading){
+        if (loading) {
             LinearProgressIndicator()
         }
     }
+}
+}
     }
 
 
@@ -139,6 +165,7 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,onUpdateDetailsClick:()->Unit,auth
 @Composable
 fun ClickableRow(
     Icon: Painter,
+    tint:Color = Color.Black,
     textContent: @Composable () -> Unit,
     onClick: () -> Unit
 ) {
@@ -151,7 +178,8 @@ fun ClickableRow(
     ) {
         Icon(painter = Icon,
             contentDescription = "",
-            modifier = Modifier.size(24.dp))
+            modifier = Modifier.size(24.dp),
+            tint = tint)
         Spacer(modifier = Modifier.width(16.dp))
         Box(modifier = Modifier.weight(1f)) {
             textContent()

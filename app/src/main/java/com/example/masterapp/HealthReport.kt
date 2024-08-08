@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -35,10 +36,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import co.yml.charts.common.extensions.isNotNull
 
 @Composable
 fun HealthReportScreen(onBackClick: () -> Unit,
                        userDetailsViewModel: UserDetailsViewModel = viewModel()) {
+
+    val homeScreenBlue by remember {
+        mutableStateOf( R.color.Home_Screen_Blue)
+    }
+    val homeScreenWhite by remember {
+        mutableStateOf(R.color.Home_Screen_White)
+    }
 
     val userData by userDetailsViewModel.userData.observeAsState()
     val userHistory by userDetailsViewModel.userHist.observeAsState()
@@ -46,11 +55,29 @@ fun HealthReportScreen(onBackClick: () -> Unit,
     var lastImpedance by remember { mutableStateOf(0) }
     var secondLastWeight by remember { mutableStateOf(0.0) }
     var secondLastWeightDate by remember { mutableStateOf("") }
+    val userUnits by userDetailsViewModel.units.observeAsState()
+    var userUnitLastWeight by remember {
+        mutableStateOf("")
+    }
+    LaunchedEffect(userUnits,lastWeight) {
+        if(userUnits.isNotNull()){
+            if(userUnits!!.weightunit == "kg") {
+                userUnitLastWeight = "$lastWeight Kgs"
+            }
+            else if(userUnits!!.weightunit == "lb"){
+                userUnitLastWeight = "${Calculate.convertKgToPounds(lastWeight).format(2)} lbs"
+            }
+        }
+        else{  //When user has not selected any Unit
+            userUnitLastWeight = "$lastWeight Kgs"
+        }
+    }
 
     if(!userHistory.isNullOrEmpty()){
         val datehist = userHistory!!.map { it.date }
         val weighthist = userHistory!!.map { it.weight }
         lastWeight = weighthist.last()
+
 
         if(userHistory!!.size>1) {
             secondLastWeight = weighthist[weighthist.size - 2]
@@ -93,8 +120,12 @@ fun HealthReportScreen(onBackClick: () -> Unit,
 
     secondLastBMI = Calculate.BMI(userData?.heightincm?:0.0,secondLastWeight)
 
+    LaunchedEffect (true){
+        userDetailsViewModel.gethistlist()
+    }
+
         Scaffold(
-            backgroundColor = colorResource(id = R.color.Home_Screen_White),
+            backgroundColor = colorResource(id = homeScreenWhite),
             topBar = {
                 TopAppBar(
                     title = {
@@ -118,7 +149,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                             )
                         }
                     },
-                    backgroundColor = colorResource(id = R.color.Home_Screen_Blue),
+                    backgroundColor = colorResource(id = homeScreenBlue),
                     contentColor = Color.Black,
                     modifier = Modifier
                         .height(100.dp),
@@ -148,7 +179,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 Modifier.padding(start = 16.dp),
                             ) {
                                 Text(text = "Body Composition",
-                                    color = colorResource(id = R.color.Home_Screen_Blue))
+                                    color = colorResource(id = homeScreenBlue))
 
                             }
                             Spacer(modifier = Modifier.height(20.dp))
@@ -167,7 +198,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 .background(color = Color.White)) {
                             Column{
                             ExpandableRow(index = "Weight",
-                                value = "$lastWeight Kgs",
+                                value = "$userUnitLastWeight",
                                 Tag = {
                                     if(lastWeight<=40){
                                         BlueTag(text = "Underweight")
@@ -282,7 +313,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                     else if(bodyFatPercent>6 && bodyFatPercent<=22){
                                         GreenTag(text = "Standard")
                                     }
-                                    else if(bodyFatPercent>22 && bodyFatPercent>=27){
+                                    else if(bodyFatPercent>22 && bodyFatPercent<=27){
                                         OrangeTag(text = "High")
 
                                     }
@@ -479,7 +510,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 Modifier.padding(start = 16.dp),
                             ) {
                                 Text(text = "Weight Management",
-                                    color = colorResource(id = R.color.Home_Screen_Blue))
+                                    color = colorResource(id = homeScreenBlue))
 
                             }
                             Spacer(modifier = Modifier.height(20.dp))
@@ -567,30 +598,28 @@ fun ExpandableRow(index: String, value: String,
                     .fillMaxWidth()
                     .animateContentSize()
                     .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = index,
-                    modifier = Modifier.weight(1f),
-                    fontWeight = FontWeight.ExtraBold
+//                    fontWeight = FontWeight.ExtraBold
                 )
-                Row (verticalAlignment = Alignment.CenterVertically){
+                Row (verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()){
                     Text(
                         text = value,
-                        modifier = Modifier.padding(start = 80.dp),
-                        fontWeight = FontWeight.Bold
+//                        fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.padding(4.dp))
                     Tag()
-                }
-
-                IconButton(onClick = { isExpanded = !isExpanded }) {
-                    Icon(
-                        imageVector =
-                        if (isExpanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = "Expand"
-                    )
+                    IconButton(onClick = { isExpanded = !isExpanded }) {
+                        Icon(
+                            imageVector =
+                            if (isExpanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = "Expand"
+                        )
+                    }
                 }
             }
 
@@ -604,10 +633,13 @@ fun ExpandableRow(index: String, value: String,
 
 @Composable
 fun BodyInfoBox() {
+    val homeScreenBlue by remember {
+        mutableStateOf( R.color.Home_Screen_Blue)
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = colorResource(id = R.color.Home_Screen_Blue))
+            .background(color = colorResource(id = homeScreenBlue))
     ) {
         Row(
             modifier = Modifier
@@ -758,13 +790,12 @@ fun NonExpandableRow(index: String, value: String) {
             ) {
                 Text(
                     text = index,
-                    modifier = Modifier.weight(1f),
-                    fontWeight = FontWeight.ExtraBold
+//                    fontWeight = FontWeight.ExtraBold
                 )
                 Text(
                     text = value,
                     modifier = Modifier.padding(start = 80.dp),
-                    fontWeight = FontWeight.Bold
+//                    fontWeight = FontWeight.Bold
                 )
 
             }

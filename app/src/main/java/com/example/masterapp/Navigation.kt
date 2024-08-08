@@ -19,7 +19,8 @@ import androidx.navigation.compose.composable
 @Composable
 fun Navigation(navController: NavController,
                authViewModel: AuthViewModel,
-               bluetoothViewModel: BleScanViewModel = viewModel()
+               bluetoothViewModel: BleScanViewModel = viewModel(),
+               userDetailsViewModel: UserDetailsViewModel = viewModel()
 ){
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val isLoading by authViewModel.isLoading.collectAsState()
@@ -32,6 +33,10 @@ fun Navigation(navController: NavController,
     var signinclick by remember {
         mutableStateOf(false)
     }
+    LaunchedEffect(true) {
+        userDetailsViewModel.gethistlist()
+    }
+
     LaunchedEffect(isLoading, isLoggedIn) {
         if (!isLoading && !StartupDone) {
             if (isLoggedIn) {
@@ -72,7 +77,7 @@ fun Navigation(navController: NavController,
                 onNavigateTosignin = {
                     navController.navigate(Screen.SignInScreen.route)
                 },
-                onLogInSuccess = { navController.navigate(Screen.UpdateDetailScreen.route) })
+                onLogInSuccess = { navController.navigate(Screen.MainView.route) })
         }
         composable(Screen.UpdateDetailScreen.route) {
             BackHandler {

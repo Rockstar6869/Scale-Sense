@@ -1,6 +1,8 @@
 package com.example.masterapp
 
 import android.util.Log
+import androidx.compose.ui.text.toLowerCase
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +32,7 @@ class UserRepository( private val auth:FirebaseAuth,
         try {
             //add user to firestore
             auth.createUserWithEmailAndPassword(email,Password).await() //This line adds user in the authentication tab
-            val user = User(firstName,lastName,email) //This is for adding the user data in the 'users' collection
+            val user = User(firstName,lastName,email.lowercase()) //This is for adding the user data in the 'users' collection
             SaveusertoFirestore(user)
             Result.Success(true)
         } catch (e:Exception){
@@ -74,6 +76,21 @@ class UserRepository( private val auth:FirebaseAuth,
             Result.Success(true)
         }
         catch(e:Exception){
+            Result.Error(e)
+        }
+
+    suspend fun changePassword(oldPassword: String, newPassword: String): Result<Boolean> =
+        try {
+            val user = auth.currentUser
+            if (user != null) {
+                val credential = EmailAuthProvider.getCredential(user.email!!, oldPassword)
+                user.reauthenticate(credential).await() // Verify the old password
+                user.updatePassword(newPassword).await() // Update to new password
+                Result.Success(true)
+            } else {
+                Result.Error(Exception("User not authenticated"))
+            }
+        } catch (e: Exception) {
             Result.Error(e)
         }
 

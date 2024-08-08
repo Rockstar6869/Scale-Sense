@@ -6,10 +6,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 class UserDetailRepository(private val firestore: FirebaseFirestore) {
+
     suspend fun uploadDetails(mailId:String,userData: UserData): Result<Unit> =
         try
         {
-            firestore.collection("users").document(mailId).    //will be user for sending height, gender age in the upload detail screen
+            firestore.collection("users").document(mailId).    //will be used for sending height, gender age in the upload detail screen
             collection("userdetails").document("userdata").set(userData).await()
             Result.Success(Unit)
         }
@@ -203,6 +204,31 @@ class UserDetailRepository(private val firestore: FirebaseFirestore) {
                 }
             } else {
                 Result.Error(Exception("Document does not exist"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+
+    suspend fun uploadUnit(mailId:String,units: Units): Result<Unit> =
+        try
+        {
+            firestore.collection("users").document(mailId).    //will be used for setting weight and height units
+            collection("units").document("unitsforheightandweight").set(units).await()
+            Result.Success(Unit)
+        }
+        catch (E:Exception){
+            Result.Error(E)
+        }
+
+    suspend fun getUnits(mailId:String): Result<Units> =
+        try{
+            val ud=firestore.collection("users").
+            document(mailId).collection("units").document("unitsforheightandweight").get().await()
+            val units = ud.toObject(Units::class.java)
+            if(units!=null){
+                Result.Success(units)
+            }else {
+                Result.Error(Exception("User Units not found"))
             }
         } catch (e: Exception) {
             Result.Error(e)

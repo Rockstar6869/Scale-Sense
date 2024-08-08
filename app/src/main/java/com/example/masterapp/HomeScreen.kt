@@ -50,14 +50,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.substring
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
+import co.yml.charts.common.extensions.isNotNull
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.delay
@@ -72,6 +81,12 @@ import kotlin.math.abs
 fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                userDetailsViewModel: UserDetailsViewModel = viewModel()
                 ,onNavigateToHealthReport:()->Unit){
+    val homeScreenBlue by remember {
+        mutableStateOf( R.color.Home_Screen_Blue)
+    }
+    val homeScreenWhite by remember {
+        mutableStateOf(R.color.Home_Screen_White)
+    }
     var progress by remember {
         mutableStateOf(false)
     }
@@ -109,11 +124,49 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
     var secondLastWeightDate by remember { mutableStateOf("") }
     var lastBMI by remember { mutableStateOf(0.0) }
     var secondLastBMI by remember { mutableStateOf(0.0) }
-    lastBMI = Calculate.BMI(userdata?.heightincm?:0.0,lastWeight)
+    lastBMI = if(userdata.isNotNull()) Calculate.BMI(userdata?.heightincm?:0.0,lastWeight) else 0.0
     secondLastBMI = Calculate.BMI(userdata?.heightincm?:0.0,secondLastWeight)
     var lastBodyFatPercent by remember { mutableStateOf(0.0) }
     var secondLastBodyFatPercent by remember { mutableStateOf(0.0) }
     var Increased by remember {mutableStateOf(false)}
+    val userUnit by userDetailsViewModel.units.observeAsState()
+    var userUnitWeight by remember {  //This is the weight in user units when scale gives us Locked value
+        mutableStateOf("")
+    }
+    var userUnitLastWeight by remember {  //This is the last weight converted to user units
+        mutableStateOf("")
+    }
+    var userUnitWeightDiff by remember {
+        mutableStateOf("")
+    }
+    var userSelectedWeightUnit by remember {  //This is the Unit that is selected by the user
+        mutableStateOf("")
+    }
+
+    LaunchedEffect(userUnit,Locked,lastWeight) {
+        if(userUnit.isNotNull()){
+            if(userUnit!!.weightunit == "kg") {
+                userUnitWeight = "$weightinkgs Kg"
+                userUnitLastWeight = "$lastWeight Kg"
+                userUnitWeightDiff  = "${(lastWeight-secondLastWeight).format(2)} Kg"
+                userSelectedWeightUnit = "kg"
+            }
+            else if(userUnit!!.weightunit == "lb"){
+                userUnitWeight = "${Calculate.convertKgToPounds(weightinkgs)} lb"
+                userUnitLastWeight = "${Calculate.convertKgToPounds(lastWeight)} lb"
+                userUnitWeightDiff  = "${Calculate.convertKgToPounds(lastWeight-secondLastWeight)} lb"
+                userSelectedWeightUnit = "lb"
+            }
+
+        }
+        else{
+//            if user has not selected any units yet then default weight: Kgs
+            userUnitWeight = "$weightinkgs Kg"
+            userUnitLastWeight = "$lastWeight Kg"
+            userUnitWeightDiff  = "${(lastWeight-secondLastWeight).format(2)} Kg"
+            userSelectedWeightUnit = "kg"
+        }
+    }
     if(!userHistory.isNullOrEmpty()){
         val datehist = userHistory!!.map { it.date }
         val weighthist = userHistory!!.map { it.weight }
@@ -123,9 +176,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
             secondLastWeightDate = datehist[datehist.size - 2]
             secondLastWeight = weighthist[weighthist.size - 2]
             NoComparableHist = false
-            if((lastWeight - secondLastWeight)>=0){
-                Increased = true
-            }
+            Increased = ((lastWeight - secondLastWeight)>=0)
         }
 
         lastWeightDate = datehist.last()
@@ -176,6 +227,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                 currentDate
                             )
                         )
+                        userDetailsViewModel.gethistlist()
                         showHealthReport = true
                     }
                     else if(lastWeight!=0.0 && abs(weightinkgs-lastWeight)<3.0){
@@ -186,6 +238,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                 currentDate
                             )
                         )
+                        userDetailsViewModel.gethistlist()
                         showHealthReport = true
                     }
                     else if(lastWeight!=0.0 && abs(weightinkgs-lastWeight)>3.0){
@@ -199,6 +252,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                         currentDate
                                     )
                                 )
+                                userDetailsViewModel.gethistlist()
                                 showHealthReport = true
                             })
                     }
@@ -221,7 +275,9 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     hexToDecimal(
                         ((it.advertisementData.subSequence(18, 23)).toString())
                             .replace("\\s".toRegex(), "")
-                    )    }}}
+                    )    }
+        }
+    }
 
 
     fun updatelist(){
@@ -338,6 +394,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
         bleScanViewModel.clearDataforRescan()
         bleScanViewModel.clearAvailableDevicesforRescan()
         isScanning.value=true
+        userDetailsViewModel.gethistlist()
         delay(2000)
         isRefreshing = false
     }
@@ -353,7 +410,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
         Box (
             Modifier
                 .fillMaxSize()
-                .background(color = colorResource(id = R.color.Home_Screen_White))){
+                .background(color = colorResource(id = homeScreenWhite))){
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -365,7 +422,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     .weight(1.2f)
                     .fillMaxSize()
                     .background(
-                        colorResource(id = R.color.Home_Screen_Blue),
+                        colorResource(id = homeScreenBlue),
                         shape = RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp)
                     )
             ){
@@ -392,11 +449,15 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     RotatingCustomProgressIndicator(progress = 0.5f, isRotating = if(Locked == "0" && finddevice) true else false,
                         textContent = {
                             Column {
-                                if(messagebodyproperties=="" || !finddevice){
-                                    Text(text = "Unconnected",
-                                        fontSize = 17.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White)
+                                if(messagebodyproperties=="" || !finddevice) {
+                                    Row (Modifier.padding(start = if(userSelectedWeightUnit == "lb") 8.dp else 0.dp)){
+                                        Text(
+                                            text = "Unconnected",
+                                            fontSize = 17.sp,
+//                                        fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                    }
                                 }
                                 Spacer(modifier = Modifier.padding(vertical = 4.dp))
                                 Row{
@@ -404,7 +465,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     Text(
                                         text = "$weight",
                                         fontSize = 45.sp,
-                                        fontWeight = FontWeight.Bold,
+//                                        fontWeight = FontWeight.Bold,
                                         color = Color.White
                                     )
                                     Column {
@@ -418,7 +479,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     }
                                 }
                                 else{
-                                    if(lastWeight==0.0) {
+                                    if(userUnitLastWeight=="" || userUnitLastWeight=="0.0 lb"|| userUnitLastWeight=="0.0 Kg") {
                                         Spacer(modifier = Modifier.padding(horizontal = 16.dp))
                                         Text(
                                             text = "--",
@@ -429,19 +490,29 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     }
                                     else{
                                         Text(
-                                            text = "$lastWeight",
+                                            text = userUnitLastWeight.substring(0,userUnitLastWeight.length-3),
                                             fontSize = 35.sp,
-                                            fontWeight = FontWeight.Bold,
+//                                            fontWeight = FontWeight.Bold,
                                             color = Color.White
                                         )
                                         Column {
                                             Spacer(modifier = Modifier.padding(vertical = 6.dp))
-                                            Text(
-                                                text = "Kg",
-                                                fontSize = 22.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.White
-                                            )
+                                            if(userSelectedWeightUnit == "kg") {
+                                                Text(
+                                                    text = "Kg",
+                                                    fontSize = 22.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White
+                                                )
+                                            }
+                                            else if(userSelectedWeightUnit == "lb"){
+                                                Text(
+                                                    text = "LB",
+                                                    fontSize = 22.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -459,14 +530,18 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
             ){
                 Column (
                     Modifier
-                        .fillMaxSize(),
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.75f),
+                    verticalArrangement = Arrangement.Bottom,
                     horizontalAlignment = Alignment.CenterHorizontally){
-                    Spacer(modifier = Modifier.height(80.dp))
+                    val configuration = LocalConfiguration.current
+                    val screenHeight = configuration.screenHeightDp.dp
+                    val dynamicHeight = (screenHeight.value / 3.5).dp
                     Box (
                         Modifier
                             .fillMaxWidth()
                             .background(Color.White)
-                            .height(210.dp)){
+                            .height(dynamicHeight)){
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -474,6 +549,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                         ) {
                             Text(
                                 text = if(!NoComparableHist) lastWeightDate else "",
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp,
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
                             )
@@ -491,7 +567,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = if(!NoComparableHist) "${(lastWeight-secondLastWeight).format(2).toDouble()} Kg" else "--",
+                                        text = if(!NoComparableHist) userUnitWeightDiff else "--",
                                         fontWeight = FontWeight.Bold,
                                         modifier = if(!NoComparableHist) Modifier.padding(start = 18.dp) else Modifier,
                                         fontSize = 20.sp
@@ -586,7 +662,14 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                             }
                             Spacer(modifier = Modifier.height(18.dp))
                             Text(
-                                text = if(!NoComparableHist) "Compare with $secondLastWeightDate" else "",
+                                text = if (!NoComparableHist) {
+                                    buildAnnotatedString {
+                                        append("Compare with ")
+                                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                            append("$secondLastWeightDate")
+                                        }
+                                    }
+                                } else AnnotatedString(""),
                                 fontSize = 15.sp,
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
                             )
@@ -597,14 +680,16 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                 Text(
                                     text = "More",
                                     fontSize = 15.sp,
-                                    color = Color.Blue,
+                                    color = colorResource(id = homeScreenBlue),
                                     modifier = Modifier.pointerInput(Unit) {
                                 detectTapGestures(onTap = {
-                                    onNavigateToHealthReport()
+                                    if(userdata.isNotNull() && lastWeight!=0.0 ) {
+                                        onNavigateToHealthReport()
+                                    }
                                 })}
                                 )
                                     Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription ="More",
-                                        tint = Color.Blue,
+                                        tint =colorResource(id = homeScreenBlue),
                                         modifier = Modifier
                                             .padding(end = 8.dp)
                                             .pointerInput(Unit) {
@@ -627,11 +712,19 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
 
             }
         }}}
+    Box(Modifier.fillMaxSize()){
+        Column (Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center){
+            val configuration = LocalConfiguration.current
+            val screenHeight = configuration.screenHeightDp.dp
+            val dynamicHeight = (screenHeight.value / 4.5).dp  //To set the height of the card with respect to the screen height
+
     Card(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 350.dp)
+            .padding(horizontal = 16.dp)
             .fillMaxWidth()
-            .height(250.dp), // Adjust the height as needed
+            .height(dynamicHeight) // Adjust the height as needed
+           ,
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White,
@@ -640,6 +733,10 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
             disabledContainerColor = Color.Black
         )
     ) {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp.dp
+        val dynamicFontSize = (screenWidth.value / 25).sp  //font size for the values
+        val dynamicFontSize2 = (screenWidth.value / 26).sp //font size for the labels
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -656,35 +753,51 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Icon(painter = painterResource(id = R.drawable.baseline_monitor_weight_24),
-                        contentDescription = "weight"
-                            ,Modifier.align(Alignment.CenterHorizontally)
-                            .padding(end = 12.dp))
+                    Icon(painter = painterResource(id = R.drawable.weight),
+                        contentDescription = "weight",
+                        tint = colorResource(id = R.color.Icon_Tint ),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(end = 12.dp)
+                            .size(19.dp))
 
                     if(Locked!="1") {
-                        Row {
-                            Spacer(modifier = Modifier.padding(horizontal = 10.dp))
-                            Text(
-                                text = "--",
-                                color = MaterialTheme.colorScheme.primary,
-                                fontSize = 30.sp
-                            )
+                        Row (Modifier.fillMaxWidth()){
+
+                            if(lastWeight == 0.0) {
+                                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+                                Text(
+                                    text = "--",
+                                    color = colorResource(id = homeScreenBlue),
+                                    fontSize = 30.sp
+                                )
+                            }
+                            else{
+                                Text(
+                                    text = userUnitLastWeight, //last weight in user Units
+                                    color = colorResource(id = homeScreenBlue),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    fontSize = dynamicFontSize,
+                                )
+                            }
                         }
                     }
                     else{
                         Text(
-                            text = "$weightinkgs Kg",
-                            color = MaterialTheme.colorScheme.primary,
+                            text = userUnitWeight,
+                            color = colorResource(id = homeScreenBlue),
                             modifier = Modifier.padding(vertical = 8.dp),
-                            fontSize = 18.sp
+                            fontSize = dynamicFontSize
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Weight",
                         color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.ExtraBold
+                        fontSize = dynamicFontSize2,
+//                        fontWeight = FontWeight.ExtraBold
                     )
                 }
                 VerticalDivider()
@@ -697,29 +810,49 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Icon(painter = painterResource(id = R.drawable.calculator),
-                        contentDescription = "BMI"
-                        ,Modifier.align(Alignment.CenterHorizontally))
+                        contentDescription = "BMI",
+                                tint = colorResource(id = R.color.Icon_Tint )
+                        , modifier = Modifier.align(Alignment.CenterHorizontally))
                     if(Locked!="1") {
-                        Text(
-                            text = "--",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 30.sp
-                        )
+                        if(lastWeight == 0.0 || !userdata.isNotNull()) {
+                            Text(
+                                text = "--",
+                                color = colorResource(id = homeScreenBlue),
+                                fontSize = 30.sp
+                            )
+                        }
+                        else{
+                            Text(
+                                text = "${Calculate.BMI(userdata?.heightincm?:0.0,lastWeight)}",
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = colorResource(id = homeScreenBlue),
+                                fontSize = dynamicFontSize
+                            )
+                        }
                     }
                     else{
-                        Text(
-                            text = "${Calculate.BMI(userdata?.heightincm?:0.0,weightinkgs)}",
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 18.sp
-                        )
+                        if(userdata.isNotNull()) {
+                            Text(
+                                text = "${Calculate.BMI(userdata?.heightincm ?: 0.0, weightinkgs)}",
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = colorResource(id = homeScreenBlue),
+                                fontSize = dynamicFontSize
+                            )
+                        }
+                        else{
+                            Text(
+                                text = "--",
+                                color = colorResource(id = homeScreenBlue),
+                                fontSize = 30.sp
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "BMI",
                         color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.ExtraBold
+                        fontSize = dynamicFontSize2,
+//                        fontWeight = FontWeight.ExtraBold
                     )
                 }
                 VerticalDivider()
@@ -732,62 +865,115 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Icon(painter = painterResource(id = R.drawable.google_fit),
-                        contentDescription = "BodyFat"
-                        ,Modifier.align(Alignment.CenterHorizontally)
+                        contentDescription = "BodyFat",
+                        tint = colorResource(id = R.color.Icon_Tint ),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
                             .padding(end = 28.dp))
 
                     if(Locked!="1") {
-                        Row (
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp),
-                            verticalAlignment = Alignment.CenterVertically){
-                            Text(
-                                text = "--",
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(start = 4.dp),
-                                fontSize = 30.sp
-                            )
-                        }
+                            if(lastWeight == 0.0 || !userdata.isNotNull()) {
+                                Row (
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 15.dp),
+                                    verticalAlignment = Alignment.CenterVertically){
+                                Text(
+                                    text = "--",
+                                    color = colorResource(id = homeScreenBlue),
+                                    modifier = Modifier.padding(start = 4.dp),
+                                    fontSize = 30.sp
+                                )
+                                }
+                            }
+                            else{
+                                if(userdata?.gender == "Male") {
+                                    Text(
+                                        text = "${
+                                            Calculate.BodyFatPercentforMale(
+                                                userdata?.age ?: 0,
+                                                Calculate.BMI(userdata?.heightincm ?: 0.0, lastWeight)
+                                            )
+                                        }%",
+                                        color = colorResource(id = homeScreenBlue),
+                                        modifier = Modifier
+                                            .padding(end = 15.dp)
+                                            .padding(vertical = 8.dp),
+                                        fontSize = dynamicFontSize
+                                    )
+                                }
+                                else{
+                                    Text(
+                                        text = "${
+                                            Calculate.BodyFatPercentforFemale(
+                                                userdata?.age ?: 0,
+                                                Calculate.BMI(userdata?.heightincm ?: 0.0, lastWeight)
+                                            )
+                                        }%",
+                                        color = colorResource(id = homeScreenBlue),
+                                        modifier = Modifier
+                                            .padding(end = 15.dp)
+                                            .padding(vertical = 8.dp),
+                                        fontSize = dynamicFontSize
+                                    )
+                                }
+                            }
                     }
-                    else{
-                        if(userdata?.gender == "Male") {
-                            Text(
-                                text = "${
-                                    Calculate.BodyFatPercentforMale(
-                                        userdata?.age ?: 0,
-                                        Calculate.BMI(userdata?.heightincm ?: 0.0, weightinkgs)
-                                    )
-                                }%",
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(end = 15.dp)
-                                    .padding(vertical = 8.dp),
-                                fontSize = 18.sp
-                            )
-                        }
+                    else {
+                        if (userdata.isNotNull()){
+                            if (userdata?.gender == "Male") {
+                                Text(
+                                    text = "${
+                                        Calculate.BodyFatPercentforMale(
+                                            userdata?.age ?: 0,
+                                            Calculate.BMI(userdata?.heightincm ?: 0.0, weightinkgs)
+                                        )
+                                    }%",
+                                    color = colorResource(id = homeScreenBlue),
+                                    modifier = Modifier
+                                        .padding(end = 15.dp)
+                                        .padding(vertical = 8.dp),
+                                    fontSize = dynamicFontSize
+                                )
+                            } else {
+                                Text(
+                                    text = "${
+                                        Calculate.BodyFatPercentforFemale(
+                                            userdata?.age ?: 0,
+                                            Calculate.BMI(userdata?.heightincm ?: 0.0, weight)
+                                        )
+                                    }%",
+                                    color = colorResource(id = homeScreenBlue),
+                                    modifier = Modifier
+                                        .padding(end = 15.dp)
+                                        .padding(vertical = 8.dp),
+                                    fontSize = dynamicFontSize
+                                )
+                            }
+                    }
                         else{
-                            Text(
-                                text = "${
-                                    Calculate.BodyFatPercentforFemale(
-                                        userdata?.age ?: 0,
-                                        Calculate.BMI(userdata?.heightincm ?: 0.0, weight)
-                                    )
-                                }%",
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(end = 15.dp)
-                                    .padding(vertical = 8.dp),
-                                fontSize = 18.sp
-                            )
+                            Row (
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 15.dp),
+                                verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "--",
+                                    color = colorResource(id = homeScreenBlue),
+                                    modifier = Modifier.padding(start = 4.dp),
+                                    fontSize = 30.sp
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Body Fat(%)",
                         color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.ExtraBold
+                        fontSize = dynamicFontSize2,
+//                        fontWeight = FontWeight.ExtraBold
                     )
                 }
             }
         }
-    }}
+    }}}}

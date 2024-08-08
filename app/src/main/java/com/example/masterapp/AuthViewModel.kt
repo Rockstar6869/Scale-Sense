@@ -21,6 +21,9 @@ class AuthViewModel : ViewModel() {
     private val _authResult = MutableLiveData<Result<Boolean>>()
     val authResult: LiveData<Result<Boolean>> get() = _authResult
 
+    private val _changePasswordResult = MutableLiveData<Result<Boolean>>()
+    val changePasswordResult: LiveData<Result<Boolean>> get() = _changePasswordResult
+
     val isLoading: StateFlow<Boolean> = userRepository.isLoading.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -49,5 +52,13 @@ class AuthViewModel : ViewModel() {
     }
     fun resetAuthResult() {
         _authResult.value = null
+    }
+    fun changePassword(oldPassword:String,newPassword:String){
+        viewModelScope.launch {
+            _changePasswordResult.value = userRepository.changePassword(oldPassword,newPassword)
+        }
+    }
+    fun resetChangePasswordResult() {
+        _changePasswordResult.value = null
     }
 }
