@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -153,6 +154,9 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
 
     )
 }
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val graphHeight = (screenHeight.value/1.455).dp
 
     Box (
         Modifier
@@ -161,7 +165,7 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
     ){
         LineChart(
             modifier = Modifier
-                .height(600.dp),
+                .height(graphHeight),
             lineChartData = lineChartData
         )
     }

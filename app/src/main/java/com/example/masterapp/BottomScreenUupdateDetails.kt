@@ -51,9 +51,8 @@ content = {
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(it)) {
-        UpdateDetailScreen(userDetailsViewModel) {
-            onNavigateToMeScreen()
-        }
+        UpdateDetailScreen(userDetailsViewModel,
+            onNavigateToAddDevice = { onNavigateToMeScreen()})
     }
 }
 )

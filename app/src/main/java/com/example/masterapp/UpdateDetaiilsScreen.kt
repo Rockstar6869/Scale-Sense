@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -22,10 +25,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,7 +40,8 @@ import java.text.SimpleDateFormat
 
 @Composable
 fun UpdateDetailScreen(userDetailsViewModel: UserDetailsViewModel = viewModel(),
-                       onNavigateToAddDevice:()->Unit){
+                       onNavigateToAddDevice:()->Unit,
+                       showUnitChanger:Boolean = false){
     var gender by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var height by remember { mutableStateOf("") }
@@ -51,6 +57,7 @@ fun UpdateDetailScreen(userDetailsViewModel: UserDetailsViewModel = viewModel(),
     val currentUserDetails by userDetailsViewModel.userData.observeAsState()
     val userUnits by userDetailsViewModel.units.observeAsState()
     var heightUnit by remember { mutableStateOf("") }
+    var heightUnitExpanded by remember { mutableStateOf(false) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -133,47 +140,61 @@ fun UpdateDetailScreen(userDetailsViewModel: UserDetailsViewModel = viewModel(),
                 Divider(color = Color.LightGray, thickness = 0.9.dp)
                 Spacer(modifier = Modifier.height(8.dp))
 
-                if(heightUnit == "" || heightUnit == "cm") {
-                    UserDetailTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = height,
-                        onValueChange = { height = it },
-                        label = "Height(CM)",
-                        visualTransformation = VisualTransformation.None,
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Divider(color = Color.LightGray, thickness = 0.8.dp)
-                }
-                else if(heightUnit == "in"){
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween // Spacing between text fields
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f)
-                                .padding(end = 10.dp)
+                Column {
+                    if (heightUnit == "" || heightUnit == "cm") {
+                        UserDetailTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = height,
+                            onValueChange = { height = it },
+                            label = "Height(CM)",
+                            visualTransformation = VisualTransformation.None,
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Divider(color = Color.LightGray, thickness = 0.9.dp)
+                    }
+                    else if (heightUnit == "in") {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween // Spacing between text fields
                         ) {
-                            UserDetailTextField(
-                                value = feet,
-                                onValueChange = { feet = it },
-                                label = "Feet"
-                            )
-                            HorizontalDivider(color = Color.LightGray, thickness = 0.8.dp)
-                        }
-                        Column(
-                            modifier = Modifier.weight(1f)
-                                .padding(start = 10.dp)
-                        ) {
-                            UserDetailTextField(
-                                value = inch,
-                                onValueChange = { inch = it },
-                                label = "In"
-                            )
-                            HorizontalDivider(color = Color.LightGray, thickness = 0.8.dp)
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 10.dp)
+                            ) {
+                                UserDetailTextField(
+                                    value = feet,
+                                    onValueChange = { feet = it },
+                                    label = "Feet"
+                                )
+                                HorizontalDivider(color = Color.LightGray, thickness = 0.8.dp)
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 10.dp)
+                            ) {
+                                UserDetailTextField(
+                                    value = inch,
+                                    onValueChange = { inch = it },
+                                    label = "In"
+                                )
+                                HorizontalDivider(color = Color.LightGray, thickness = 0.8.dp)
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    if(showUnitChanger){
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+//
+                            UnitSelector(onSelect = {heightUnit = it} )
+                    }
                 }
+            }
                 Spacer(modifier = Modifier.height(8.dp))
 
                 DropdownMenu(
@@ -227,6 +248,70 @@ fun UpdateDetailScreen(userDetailsViewModel: UserDetailsViewModel = viewModel(),
     }
 
 }
+@Composable
+fun UnitSelector(onSelect:(unitSelected:String)->Unit) {
+    var selectedUnit by remember { mutableStateOf("cm") }
+
+    Row(
+        modifier = Modifier
+            .padding(8.dp)
+            .height(30.dp)
+            .width(100.dp)
+            .background(Color.LightGray, shape = RoundedCornerShape(16.dp))
+    ) {
+        // First part - "cm"
+        Box(
+            modifier = Modifier
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            selectedUnit = "cm"
+                            onSelect("cm")
+                        }
+                    )
+                }
+                .weight(1f)
+                .padding(8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "cm",
+                color = if (selectedUnit == "cm") colorResource(id = R.color.Home_Screen_Blue) else Color.Black,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        // Divider
+        VerticalDivider(
+            color = Color.Gray,
+            modifier = Modifier
+                .width(1.dp)
+                .padding(4.dp)
+        )
+
+        // Second part - "in"
+        Box(
+            modifier = Modifier
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            selectedUnit = "in"
+                            onSelect("in")
+                        }
+                    )
+                }
+                .weight(1f)
+                .padding(8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "in",
+                color = if (selectedUnit == "in") colorResource(id = R.color.Home_Screen_Blue) else Color.Black,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
 
 @Composable
 fun UserDetailTextField(
@@ -260,5 +345,6 @@ fun UserDetailTextField(
 @Preview(showBackground = true)
 @Composable
 fun UpdateDetailScreenPreview() {
-    UpdateDetailScreen(){}
+    UpdateDetailScreen(showUnitChanger = false,
+        onNavigateToAddDevice = {})
 }

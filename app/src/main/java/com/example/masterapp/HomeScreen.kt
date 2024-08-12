@@ -81,6 +81,9 @@ import kotlin.math.abs
 fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                userDetailsViewModel: UserDetailsViewModel = viewModel()
                 ,onNavigateToHealthReport:()->Unit){
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidthDp = configuration.screenWidthDp.dp
     val homeScreenBlue by remember {
         mutableStateOf( R.color.Home_Screen_Blue)
     }
@@ -451,12 +454,15 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                             Column {
                                 if(messagebodyproperties=="" || !finddevice) {
                                     Row (Modifier.padding(start = if(userSelectedWeightUnit == "lb") 8.dp else 0.dp)){
-                                        Text(
-                                            text = "Unconnected",
-                                            fontSize = 17.sp,
+                                        Row (Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.Center) {
+                                            Text(
+                                                text = "Unconnected",
+                                                fontSize = if (screenWidthDp < 600.dp) 17.sp else 25.sp,
 //                                        fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
+                                                color = Color.White
+                                            )
+                                        }
                                     }
                                 }
                                 Spacer(modifier = Modifier.padding(vertical = 4.dp))
@@ -464,15 +470,15 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                 if(finddevice) {
                                     Text(
                                         text = "$weight",
-                                        fontSize = 45.sp,
+                                        fontSize = if(screenWidthDp<600.dp) 45.sp else 66.sp,
 //                                        fontWeight = FontWeight.Bold,
                                         color = Color.White
                                     )
                                     Column {
-                                        Spacer(modifier = Modifier.padding(vertical = 10.dp))
+                                        Spacer(modifier = Modifier.padding(vertical = if(screenWidthDp<600.dp) 10.dp else 15.dp))
                                         Text(
                                             text = if (Unit =="00") "Kg" else "LB",
-                                            fontSize = 22.sp,
+                                            fontSize = if(screenWidthDp<600.dp) 22.sp else 32.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White
                                         )
@@ -480,40 +486,47 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                 }
                                 else{
                                     if(userUnitLastWeight=="" || userUnitLastWeight=="0.0 lb"|| userUnitLastWeight=="0.0 Kg") {
-                                        Spacer(modifier = Modifier.padding(horizontal = 16.dp))
-                                        Text(
-                                            text = "--",
-                                            fontSize = 35.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
+                                        Row (Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.Center){
+                                            Text(
+                                                text = "--",
+                                                fontSize = if (screenWidthDp < 600.dp) 35.sp else 51.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                        }
                                     }
-                                    else{
+                                    else {
+                                        Row(Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.Center){
                                         Text(
-                                            text = userUnitLastWeight.substring(0,userUnitLastWeight.length-3),
-                                            fontSize = 35.sp,
+                                            text = userUnitLastWeight.substring(
+                                                0,
+                                                userUnitLastWeight.length - 3
+                                            ),
+                                            fontSize = if (screenWidthDp < 600.dp) 35.sp else 51.sp,
 //                                            fontWeight = FontWeight.Bold,
                                             color = Color.White
                                         )
                                         Column {
-                                            Spacer(modifier = Modifier.padding(vertical = 6.dp))
-                                            if(userSelectedWeightUnit == "kg") {
+                                            Spacer(modifier = Modifier.padding(vertical = if (screenWidthDp < 600.dp) 6.dp else 9.dp))
+                                            if (userSelectedWeightUnit == "kg") {
                                                 Text(
                                                     text = "Kg",
-                                                    fontSize = 22.sp,
+                                                    fontSize = if (screenWidthDp < 600.dp) 22.sp else 32.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = Color.White
                                                 )
-                                            }
-                                            else if(userSelectedWeightUnit == "lb"){
+                                            } else if (userSelectedWeightUnit == "lb") {
                                                 Text(
                                                     text = "LB",
-                                                    fontSize = 22.sp,
+                                                    fontSize = if (screenWidthDp < 600.dp) 22.sp else 32.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = Color.White
                                                 )
                                             }
                                         }
+                                    }
                                     }
                                 }
                                 }
@@ -528,15 +541,16 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     .weight(1f)
                     .fillMaxSize()
             ){
+                val configuration = LocalConfiguration.current
+                val screenHeight = configuration.screenHeightDp.dp
+                val dynamicHeight = (screenHeight.value / 3.5).dp
+                val distancing = if(screenWidthDp<600.dp) (screenHeight.value / 54.56).dp else (screenHeight.value / 25).dp
                 Column (
                     Modifier
                         .fillMaxWidth()
                         .fillMaxHeight(0.75f),
                     verticalArrangement = Arrangement.Bottom,
                     horizontalAlignment = Alignment.CenterHorizontally){
-                    val configuration = LocalConfiguration.current
-                    val screenHeight = configuration.screenHeightDp.dp
-                    val dynamicHeight = (screenHeight.value / 3.5).dp
                     Box (
                         Modifier
                             .fillMaxWidth()
@@ -554,7 +568,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
                             )
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(distancing))
 
                             Row(
                                 modifier = Modifier
@@ -567,7 +581,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = if(!NoComparableHist) userUnitWeightDiff else "--",
+                                        text = if(!NoComparableHist) SignAdder(userUnitWeightDiff) else "--",
                                         fontWeight = FontWeight.Bold,
                                         modifier = if(!NoComparableHist) Modifier.padding(start = 18.dp) else Modifier,
                                         fontSize = 20.sp
@@ -600,7 +614,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = if(NoComparableHist) "--" else "${(lastBMI-secondLastBMI).format(2).toDouble()}",
+                                        text = if(NoComparableHist) "--" else SignAdder((lastBMI-secondLastBMI).format(2)),
                                         fontWeight = FontWeight.Bold,
                                         modifier = if(!NoComparableHist) Modifier.padding(start = 24.dp) else Modifier,
                                         fontSize = 20.sp
@@ -632,7 +646,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = if(!NoComparableHist) "${(lastBodyFatPercent-secondLastBodyFatPercent).format(2).toDouble()}%" else "--",
+                                        text = if(!NoComparableHist) "${SignAdder((lastBodyFatPercent-secondLastBodyFatPercent).format(2))}%" else "--",
                                         modifier = if(!NoComparableHist) Modifier.padding(start = 18.dp) else Modifier,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 20.sp
@@ -660,7 +674,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     }
                                 }
                             }
-                            Spacer(modifier = Modifier.height(18.dp))
+                            Spacer(modifier = Modifier.height(distancing))
                             Text(
                                 text = if (!NoComparableHist) {
                                     buildAnnotatedString {
@@ -673,7 +687,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                 fontSize = 15.sp,
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
                             )
-                            Spacer(modifier = Modifier.height(25.dp))
+                            Spacer(modifier = Modifier.height(distancing))
                             Row (Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.Center
                                 , verticalAlignment = Alignment.CenterVertically){
@@ -735,8 +749,9 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
     ) {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp.dp
-        val dynamicFontSize = (screenWidth.value / 25).sp  //font size for the values
-        val dynamicFontSize2 = (screenWidth.value / 26).sp //font size for the labels
+        val dynamicFontSize = if(screenWidth<600.dp)(screenWidth.value / 25).sp else  (screenWidth.value / 34).sp //font size for the values
+        val dynamicFontSize2 = if(screenWidth<600.dp)(screenWidth.value / 26).sp else  (screenWidth.value / 35).sp //font size for the labels
+        val dynamicIconSize = (screenWidth.value / 20.68).dp
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -749,8 +764,10 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .padding(horizontal = 24.dp),
-                    horizontalAlignment = Alignment.Start,
+                        .fillMaxWidth()
+//                        .padding(horizontal = 24.dp)
+                        ,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Icon(painter = painterResource(id = R.drawable.weight),
@@ -758,14 +775,15 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                         tint = colorResource(id = R.color.Icon_Tint ),
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
-                            .padding(end = 12.dp)
-                            .size(19.dp))
+//                            .padding(end = if(screenWidthDp<600.dp) 12.dp else 0.dp)
+                            .size(dynamicIconSize))
 
                     if(Locked!="1") {
-                        Row (Modifier.fillMaxWidth()){
+                        Row (Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center){
 
                             if(lastWeight == 0.0) {
-                                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+//                                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
                                 Text(
                                     text = "--",
                                     color = colorResource(id = homeScreenBlue),
@@ -812,7 +830,9 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     Icon(painter = painterResource(id = R.drawable.calculator),
                         contentDescription = "BMI",
                                 tint = colorResource(id = R.color.Icon_Tint )
-                        , modifier = Modifier.align(Alignment.CenterHorizontally))
+                        , modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .size(dynamicIconSize))
                     if(Locked!="1") {
                         if(lastWeight == 0.0 || !userdata.isNotNull()) {
                             Text(
@@ -860,8 +880,8 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .padding(horizontal = 18.dp),
-                    horizontalAlignment = Alignment.End,
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Icon(painter = painterResource(id = R.drawable.google_fit),
@@ -869,14 +889,14 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                         tint = colorResource(id = R.color.Icon_Tint ),
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
-                            .padding(end = 28.dp))
+                            .size(dynamicIconSize))
 
                     if(Locked!="1") {
                             if(lastWeight == 0.0 || !userdata.isNotNull()) {
                                 Row (
                                     Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 15.dp),
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center,
                                     verticalAlignment = Alignment.CenterVertically){
                                 Text(
                                     text = "--",
@@ -896,9 +916,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                             )
                                         }%",
                                         color = colorResource(id = homeScreenBlue),
-                                        modifier = Modifier
-                                            .padding(end = 15.dp)
-                                            .padding(vertical = 8.dp),
+                                        modifier = Modifier.padding(vertical = 8.dp),
                                         fontSize = dynamicFontSize
                                     )
                                 }
@@ -911,9 +929,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                             )
                                         }%",
                                         color = colorResource(id = homeScreenBlue),
-                                        modifier = Modifier
-                                            .padding(end = 15.dp)
-                                            .padding(vertical = 8.dp),
+                                        modifier = Modifier.padding(vertical = 8.dp),
                                         fontSize = dynamicFontSize
                                     )
                                 }
@@ -930,9 +946,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                         )
                                     }%",
                                     color = colorResource(id = homeScreenBlue),
-                                    modifier = Modifier
-                                        .padding(end = 15.dp)
-                                        .padding(vertical = 8.dp),
+                                    modifier = Modifier.padding(vertical = 8.dp),
                                     fontSize = dynamicFontSize
                                 )
                             } else {
@@ -944,9 +958,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                         )
                                     }%",
                                     color = colorResource(id = homeScreenBlue),
-                                    modifier = Modifier
-                                        .padding(end = 15.dp)
-                                        .padding(vertical = 8.dp),
+                                    modifier = Modifier.padding(vertical = 8.dp),
                                     fontSize = dynamicFontSize
                                 )
                             }
@@ -954,8 +966,8 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                         else{
                             Row (
                                 Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp),
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = "--",

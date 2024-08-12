@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -87,6 +88,10 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun RotatingCustomProgressIndicator(progress: Float, textContent: @Composable () -> Unit, isRotating: Boolean) {
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp.dp
+    val screenHeightDp = configuration.screenHeightDp.dp
+
     val infiniteTransition = rememberInfiniteTransition()
     val rotationAngle by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -105,12 +110,12 @@ fun RotatingCustomProgressIndicator(progress: Float, textContent: @Composable ()
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(200.dp)
+            .size(if(screenWidthDp<600.dp) 200.dp else 300.dp)
     ) {
         val RimColor = colorResource(id = R.color.Circular_Progress_Rim)
         Canvas(
             modifier = Modifier
-                .size(200.dp)
+                .size(if(screenWidthDp<600.dp) 200.dp else 300.dp)
                 .graphicsLayer(rotationZ = if (isRotating) rotationAngle else 0f)
         ) {
             drawCircleProgressIndicator(animatedProgress,RimColor)

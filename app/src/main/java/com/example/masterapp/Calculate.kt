@@ -70,12 +70,69 @@ object Calculate {
     fun SkeletalMusscleMassforFemale(Impedence:Double,HeightInCM: Double,Age: Int):Double{
         return (((((HeightInCM*HeightInCM)/Impedence)*0.401) + (0*3.825) + (Age* (-0.071)))+5.102).format(2).toDouble()
     }
-    fun BoneWeightPercentforMale(Age:Int,HeightInCM: Double):Double{
-        return (2.447-0.09156*Age+0.1074*HeightInCM+0.3362*1.1).format(2).toDouble()
+    fun BoneWeight(WeightInKG: Double,HeightInCM: Double,Age: Int):Double{
+        return (-0.25+((0.046*HeightInCM)+(0.036*WeightInKG)-(0.012*Age))).format(2).toDouble()
     }
-    fun BoneWeightPercentforFemale(Age:Int,HeightInCM: Double):Double{
-        return (-1.097+0.05373*Age+0.03755*HeightInCM+0.6919*1.1).format(2).toDouble()
+    fun BoneWeightPercent(WeightInKG: Double,HeightInCM: Double,Age: Int):Double{
+        val BoneWeight = BoneWeight(WeightInKG,HeightInCM,Age)
+        return ((BoneWeight/WeightInKG)*100).format(2).toDouble()
     }
+    fun InorganicSalt(WeightInKG: Double):Double{
+        return (0.04*WeightInKG).format(2).toDouble()
+    }
+    fun Subcalc(HeightInCM: Double):Double{
+        return (((HeightInCM * 0.4) - (HeightInCM * (HeightInCM * 0.0826))) * (-1)).format(2).toDouble()
+    }
+    fun VisceralFatIndex(HeightInCM:Double,WeightInKG:Double,Age:Int):Double{
+        val subcalc = Subcalc(HeightInCM)
+        return (((WeightInKG * 305) / (subcalc + 48)) - 2.9 + (Age * 0.15)).format(2).toDouble()
+    }
+    fun SubcutaneousFatForMale(WeightInKG: Double,HeightInCM: Double,Age: Int):Double{
+        val bfatpercent = BodyFatPercentforMale(Age, BMI(HeightInCM,WeightInKG))
+        val bfat = BodyFat(WeightInKG,bfatpercent)
+        val vfatindex = VisceralFatIndex(HeightInCM,WeightInKG,Age)
+        return  (bfat-(bfat*vfatindex/100)).format(2).toDouble()
+    }
+    fun SubcutaneousFatForFemale(WeightInKG: Double,HeightInCM: Double,Age: Int):Double{
+        val bfatpercent = BodyFatPercentforFemale(Age, BMI(HeightInCM,WeightInKG))
+        val bfat = BodyFat(WeightInKG,bfatpercent)
+        val vfatindex = VisceralFatIndex(HeightInCM,WeightInKG,Age)
+        return  (bfat-(bfat*vfatindex/100)).format(2).toDouble()
+    }
+
+    fun AMRforMale(WeightInKG: Double,HeightInCM: Double,Age: Int,Activity:String = "e"):Double{
+        val multiplyingFactor = if(Activity == "la") 1.375
+            else if(Activity == "ma") 1.55
+            else if(Activity == "a") 1.725
+            else if(Activity == "ea") 1.9
+            else 1.2
+        val BMR = BMRforMale(WeightInKG,HeightInCM,Age)
+        return (BMR*multiplyingFactor).format(2).toDouble()
+    }
+    fun AMRforFemale(WeightInKG: Double,HeightInCM: Double,Age: Int,Activity:String = "e"):Double{
+        val multiplyingFactor = if(Activity == "la") 1.375
+        else if(Activity == "ma") 1.55
+        else if(Activity == "a") 1.725
+        else if(Activity == "ea") 1.9
+        else 1.2
+        val BMR = BMRforFemale(WeightInKG,HeightInCM,Age)
+        return (BMR*multiplyingFactor).format(2).toDouble()
+    }
+
+    fun Protien(Weight:Double,BodyFatPercent: Double):Double{
+        val lbm = LeanBodyMass(Weight,BodyFatPercent)
+        return (0.2*lbm).format(2).toDouble()
+    }
+    fun ProtienPercentage(Weight:Double,BodyFatPercent: Double):Double{
+        val lbm = LeanBodyMass(Weight,BodyFatPercent)
+        return ((0.2*lbm)/Weight *100).format(2).toDouble()
+    }
+
+    fun MusclePercent(BodyWaterPercent:Double,Weight:Double,BodyFatPercent: Double):Double{
+        val Protien = Protien(Weight,BodyFatPercent)
+        return (Protien+BodyWaterPercent).format(2).toDouble()
+    }
+
 }
 
 
@@ -94,6 +151,14 @@ fun isDouble(input: String): Boolean {
         true
     } catch (e: NumberFormatException) {
         false
+    }
+}
+
+fun SignAdder(input: String): String {
+    return if (input.startsWith("-")) {
+        input
+    } else {
+        "+$input"
     }
 }
 

@@ -1,6 +1,5 @@
 package com.example.masterapp
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -10,12 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -115,16 +111,19 @@ fun CustomSlider3(
             ) {
                 Text(
                     text = blueText,
+                    modifier = Modifier.weight(1f),
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
+                    modifier = Modifier.weight(1f),
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = orangeText,
+                    modifier = Modifier.weight(1f),
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center
                 )
@@ -169,7 +168,7 @@ fun BodyWaterPercentSlider(
         val blue = colorResource(id = R.color.Slider_Blue)
         val green = colorResource(id = R.color.Slider_Green)
         val orange= colorResource(id = R.color.Slider_Orange)
-        val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (orangeRange.endInclusive - orangeRange.start)
+        val totalRange = (blueRange.endInclusive-blueRange.start) + (greenRange.endInclusive - greenRange.start) + (orangeRange.endInclusive - orangeRange.start)
 
         Box(
             modifier = Modifier
@@ -179,9 +178,10 @@ fun BodyWaterPercentSlider(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row (Modifier.fillMaxWidth(0.4f),
+                Row (Modifier.fillMaxWidth(0.33f),
                     horizontalArrangement = Arrangement.End){
                     Text(
                         text = blueRange.endInclusive.toString(),
@@ -190,8 +190,8 @@ fun BodyWaterPercentSlider(
                         textAlign = TextAlign.Center
                     )
                 }
-                Row (Modifier.fillMaxWidth(0.4f),
-                    horizontalArrangement = Arrangement.End) {
+                Row (Modifier.fillMaxWidth(0.5f),
+                    horizontalArrangement = Arrangement.Start) {
                     Text(
                         text = greenRange.endInclusive.toString(),
                         fontSize = 14.sp,
@@ -206,7 +206,7 @@ fun BodyWaterPercentSlider(
                 .align(Alignment.CenterStart)
             ) {
                 val width = size.width
-                val blueWidth = (blueRange.endInclusive / totalRange) * width
+                val blueWidth = ((blueRange.endInclusive-blueRange.start) / totalRange) * width
                 val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
                 val orangeWidth = ((orangeRange.endInclusive - orangeRange.start) / totalRange) * width
 
@@ -270,7 +270,7 @@ fun BodyWaterPercentSlider(
             Slider(
                 value = value,
                 onValueChange = onValueChange,
-                valueRange = 0f..totalRange,  // Set the total range for the slider
+                valueRange = 35f..80f,  // Set the total range for the slider
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterStart),
@@ -929,7 +929,7 @@ fun LeanBodyMassPercentSlider(
         val blue = colorResource(id = R.color.Slider_Blue)
         val green = colorResource(id = R.color.Slider_Green)
         val orange= colorResource(id = R.color.Slider_Orange)
-        val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (orangeRange.endInclusive - orangeRange.start)
+        val totalRange = (blueRange.endInclusive-blueRange.start) + (greenRange.endInclusive - greenRange.start) + (orangeRange.endInclusive - orangeRange.start)
 
         Box(
             modifier = Modifier
@@ -942,7 +942,7 @@ fun LeanBodyMassPercentSlider(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row (Modifier.fillMaxWidth(0.65f),
+                Row (Modifier.fillMaxWidth(0.33f),
                     horizontalArrangement = Arrangement.End){
                     Text(
                         text = blueRange.endInclusive.toString(),
@@ -950,7 +950,7 @@ fun LeanBodyMassPercentSlider(
                         textAlign = TextAlign.Center
                     )
                 }
-                Row(Modifier.fillMaxWidth(0.4f),
+                Row(Modifier.fillMaxWidth(0.5f),
                     horizontalArrangement = Arrangement.Start) {
                     Text(
                         text = greenRange.endInclusive.toString(),
@@ -965,7 +965,7 @@ fun LeanBodyMassPercentSlider(
                 .align(Alignment.CenterStart)
             ) {
                 val width = size.width
-                val blueWidth = (blueRange.endInclusive / totalRange) * width
+                val blueWidth = ((blueRange.endInclusive-blueRange.start) / totalRange) * width
                 val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
                 val orangeWidth = ((orangeRange.endInclusive - orangeRange.start) / totalRange) * width
 
@@ -1002,16 +1002,13 @@ fun LeanBodyMassPercentSlider(
                     .padding(top = 38.dp),
 //                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row (Modifier.fillMaxWidth()) {
                         Text(
                             text = blueText,
                             fontSize = 14.sp,
                             modifier = Modifier
-                                .weight(2f),
+                                .weight(1f),
                             textAlign = TextAlign.Center
                         )
-                    Row (Modifier.weight(1f),
-                        horizontalArrangement = Arrangement.SpaceEvenly){
                         Text(
                             text = greenText,
                             fontSize = 14.sp,
@@ -1023,18 +1020,18 @@ fun LeanBodyMassPercentSlider(
                         Text(
                             text = orangeText,
                             fontSize = 14.sp,
-                            modifier = Modifier,
+                            modifier = Modifier
+                                .weight(1f),
                             textAlign = TextAlign.Center
                         )
-                    }
-                }
+
             }
 
             // Draw the Slider
             Slider(
                 value = value,
                 onValueChange = onValueChange,
-                valueRange = 0f..totalRange,  // Set the total range for the slider
+                valueRange = 46f..112f,  // Set the total range for the slider
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterStart),
@@ -1069,7 +1066,7 @@ fun BMRSlider(
         val blue = colorResource(id = R.color.Slider_Blue)
         val green = colorResource(id = R.color.Slider_Green)
         val darkGreen= colorResource(id = R.color.Slider_DarkGreen)
-        val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (darkGreenRange.endInclusive - darkGreenRange.start)
+        val totalRange = (blueRange.endInclusive-blueRange.start) + (greenRange.endInclusive - greenRange.start) + (darkGreenRange.endInclusive - darkGreenRange.start)
 
         Box(
             modifier = Modifier
@@ -1083,7 +1080,7 @@ fun BMRSlider(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth(0.45f)) {
+                    modifier = Modifier.fillMaxWidth(0.33f)) {
                     Text(
                         text = blueRange.endInclusive.toString(),
                         fontSize = 14.sp,
@@ -1092,7 +1089,7 @@ fun BMRSlider(
                     )
                 }
                 Row(horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier.fillMaxWidth(0.85f)) {
+                    modifier = Modifier.fillMaxWidth(0.5f)) {
                     Text(
                         text = greenRange.endInclusive.toString(),
                         fontSize = 14.sp,
@@ -1107,9 +1104,9 @@ fun BMRSlider(
                 .align(Alignment.CenterStart)
             ) {
                 val width = size.width
-                val blueWidth = (blueRange.endInclusive / totalRange) * width
+                val blueWidth = ((blueRange.endInclusive-blueRange.start) / totalRange) * width
                 val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
-                val orangeWidth = ((darkGreenRange.endInclusive - darkGreenRange.start) / totalRange) * width
+                val darkGreenWidth = ((darkGreenRange.endInclusive - darkGreenRange.start) / totalRange) * width
 
                 // Draw the first part of the track (red)
                 drawLine(
@@ -1133,7 +1130,7 @@ fun BMRSlider(
                 drawLine(
                     color = darkGreen,
                     start = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
-                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth + orangeWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth + darkGreenWidth, center.y),
                     strokeWidth = trackHeight,
                     cap = StrokeCap.Round
                 )
@@ -1168,7 +1165,7 @@ fun BMRSlider(
             Slider(
                 value = value,
                 onValueChange = onValueChange,
-                valueRange = 0f..totalRange,  // Set the total range for the slider
+                valueRange = 1250f..1850f,  // Set the total range for the slider
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterStart),
@@ -1203,7 +1200,7 @@ fun BonePercentSlider(
         val blue = colorResource(id = R.color.Slider_Blue)
         val green = colorResource(id = R.color.Slider_Green)
         val darkGreen= colorResource(id = R.color.Slider_DarkGreen)
-        val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (darkGreenRange.endInclusive - darkGreenRange.start)
+        val totalRange = (blueRange.endInclusive-blueRange.start) + (greenRange.endInclusive - greenRange.start) + (darkGreenRange.endInclusive - darkGreenRange.start)
 
         Box(
             modifier = Modifier
@@ -1216,20 +1213,24 @@ fun BonePercentSlider(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = blueRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 190.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(end = 100.dp),
-                    textAlign = TextAlign.Center
-                )
+                Row (Modifier.fillMaxWidth(0.33f),
+                    horizontalArrangement = Arrangement.End){
+                    Text(
+                        text = blueRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row (Modifier.fillMaxWidth(0.5f),
+                    horizontalArrangement = Arrangement.Start) {
+                    Text(
+                        text = greenRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
             Canvas(modifier = Modifier
                 .fillMaxWidth()
@@ -1237,9 +1238,9 @@ fun BonePercentSlider(
                 .align(Alignment.CenterStart)
             ) {
                 val width = size.width
-                val blueWidth = (blueRange.endInclusive / totalRange) * width
+                val blueWidth = ((blueRange.endInclusive-blueRange.start) / totalRange) * width
                 val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
-                val orangeWidth = ((darkGreenRange.endInclusive - darkGreenRange.start) / totalRange) * width
+                val darkGreenWidth = ((darkGreenRange.endInclusive - darkGreenRange.start) / totalRange) * width
 
                 // Draw the first part of the track (red)
                 drawLine(
@@ -1263,7 +1264,7 @@ fun BonePercentSlider(
                 drawLine(
                     color = darkGreen,
                     start = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth, center.y),
-                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth + orangeWidth, center.y),
+                    end = androidx.compose.ui.geometry.Offset(blueWidth + greenWidth + darkGreenWidth, center.y),
                     strokeWidth = trackHeight,
                     cap = StrokeCap.Round
                 )
@@ -1271,27 +1272,28 @@ fun BonePercentSlider(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 38.dp)
+                    .padding(top = 38.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = blueText,
                     fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 100.dp),
+                    modifier = Modifier
+                        .weight(1f),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 80.dp),
+                    modifier = Modifier
+                        .weight(1f),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = darkGreenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 40.dp),
+                    modifier = Modifier
+                        .weight(1f),
                     textAlign = TextAlign.Center
                 )
             }
@@ -1300,7 +1302,7 @@ fun BonePercentSlider(
             Slider(
                 value = value,
                 onValueChange = onValueChange,
-                valueRange = 0f..totalRange,  // Set the total range for the slider
+                valueRange = 5f..20f,  // Set the total range for the slider
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterStart),
@@ -1335,7 +1337,7 @@ fun ProteinPercentSlider(
         val blue = colorResource(id = R.color.Slider_Blue)
         val green = colorResource(id = R.color.Slider_Green)
         val orange= colorResource(id = R.color.Slider_Orange)
-        val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (orangeRange.endInclusive - orangeRange.start)
+        val totalRange = (blueRange.endInclusive-blueRange.start) + (greenRange.endInclusive - greenRange.start) + (orangeRange.endInclusive - orangeRange.start)
 
         Box(
             modifier = Modifier
@@ -1345,22 +1347,27 @@ fun ProteinPercentSlider(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = blueRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 200.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 60.dp),
-                    textAlign = TextAlign.Center
-                )
+                Row(Modifier.fillMaxWidth(0.33f),
+                    horizontalArrangement = Arrangement.End) {
+                    Text(
+                        text = blueRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row (Modifier.fillMaxWidth(0.5f),
+                    horizontalArrangement = Arrangement.Start){
+                    Text(
+                        text = greenRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
             Canvas(modifier = Modifier
                 .fillMaxWidth()
@@ -1368,7 +1375,7 @@ fun ProteinPercentSlider(
                 .align(Alignment.CenterStart)
             ) {
                 val width = size.width
-                val blueWidth = (blueRange.endInclusive / totalRange) * width
+                val blueWidth = ((blueRange.endInclusive-blueRange.start) / totalRange) * width
                 val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
                 val orangeWidth = ((orangeRange.endInclusive - orangeRange.start) / totalRange) * width
 
@@ -1404,34 +1411,34 @@ fun ProteinPercentSlider(
                     .fillMaxWidth()
                     .padding(top = 38.dp)
             ) {
-                Text(
-                    text = blueText,
-                    fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 30.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenText,
-                    fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 180.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = orangeText,
-                    fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 40.dp),
-                    textAlign = TextAlign.Center
-                )
+                    Text(
+                        text = blueText,
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .weight(1f),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = greenText,
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .weight(1f),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = orangeText,
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .weight(1f),
+                        textAlign = TextAlign.Center
+                    )
             }
 
             // Draw the Slider
             Slider(
                 value = value,
                 onValueChange = onValueChange,
-                valueRange = 0f..totalRange,  // Set the total range for the slider
+                valueRange = 11.9f..24.2f,  // Set the total range for the slider
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterStart),
@@ -1466,7 +1473,7 @@ fun MusclePercentSlider(
         val blue = colorResource(id = R.color.Slider_Blue)
         val green = colorResource(id = R.color.Slider_Green)
         val darkGreen= colorResource(id = R.color.Slider_DarkGreen)
-        val totalRange = blueRange.endInclusive + (greenRange.endInclusive - greenRange.start) + (darkGreenRange.endInclusive - darkGreenRange.start)
+        val totalRange = (blueRange.endInclusive-blueRange.start) + (greenRange.endInclusive - greenRange.start) + (darkGreenRange.endInclusive - darkGreenRange.start)
 
         Box(
             modifier = Modifier
@@ -1479,20 +1486,26 @@ fun MusclePercentSlider(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = blueRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 230.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(end = 50.dp),
-                    textAlign = TextAlign.Center
-                )
+                Row (Modifier.fillMaxWidth(0.33f),
+                    horizontalArrangement = Arrangement.End){
+
+                    Text(
+                        text = blueRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Row(Modifier.fillMaxWidth(0.5f),
+                    horizontalArrangement = Arrangement.Start) {
+                    Text(
+                        text = greenRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
             Canvas(modifier = Modifier
                 .fillMaxWidth()
@@ -1500,7 +1513,7 @@ fun MusclePercentSlider(
                 .align(Alignment.CenterStart)
             ) {
                 val width = size.width
-                val blueWidth = (blueRange.endInclusive / totalRange) * width
+                val blueWidth = ((blueRange.endInclusive - blueRange.start) / totalRange) * width
                 val greenWidth = ((greenRange.endInclusive - greenRange.start) / totalRange) * width
                 val orangeWidth = ((darkGreenRange.endInclusive - darkGreenRange.start) / totalRange) * width
 
@@ -1539,31 +1552,32 @@ fun MusclePercentSlider(
                 Text(
                     text = blueText,
                     fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 100.dp),
+                    modifier = Modifier
+                        .weight(1f),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 100.dp),
+                    modifier = Modifier
+                        .weight(1f),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = darkGreenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.
-                    padding(start = 20.dp),
+                    modifier = Modifier
+                        .weight(1f),
                     textAlign = TextAlign.Center
                 )
             }
 
             // Draw the Slider
+
             Slider(
                 value = value,
                 onValueChange = onValueChange,
-                valueRange = 0f..totalRange,  // Set the total range for the slider
+                valueRange = 65f..89f,  // Set the total range for the slider
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterStart),
@@ -1607,22 +1621,29 @@ fun VisceralFatIndexSlider(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = greenRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(start = 130.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = orangeRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(start = 70.dp),
-                    textAlign = TextAlign.Center
-                )
+                Row (Modifier.fillMaxWidth(0.4f),
+                    horizontalArrangement = Arrangement.End
+                ){
+                    Text(
+                        text = greenRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row(Modifier.fillMaxWidth(0.57f),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Text(
+                        text = orangeRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
             Canvas(modifier = Modifier
                 .fillMaxWidth()
@@ -1741,20 +1762,24 @@ fun SubcutaneousFatSlider(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = blueRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(start = 100.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = greenRange.endInclusive.toString(),
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(end = 90.dp),
-                    textAlign = TextAlign.Center
-                )
+                Row(Modifier.fillMaxWidth(0.33f),
+                    horizontalArrangement = Arrangement.End) {
+                    Text(
+                        text = blueRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Row(Modifier.fillMaxWidth(0.5f),
+                    horizontalArrangement = Arrangement.Start) {
+                    Text(
+                        text = greenRange.endInclusive.toString(),
+                        fontSize = 14.sp,
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
             Canvas(modifier = Modifier
                 .fillMaxWidth()
@@ -1802,19 +1827,19 @@ fun SubcutaneousFatSlider(
                 Text(
                     text = blueText,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(start = 40.dp),
+                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = greenText,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(),
+                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = orangeText,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(end = 40.dp),
+                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
             }
@@ -1911,13 +1936,13 @@ fun BMISliderPreview() {
 @Preview(showBackground = true)
 @Composable
 fun BodyWaterPercentPreview() {
-    var sliderValue by remember { mutableStateOf(0f) }
+    var sliderValue by remember { mutableStateOf(65f) }
     BodyWaterPercentSlider(
         value = sliderValue,
         onValueChange = { sliderValue = it },
-        blueRange = 0f..50f,  // Define the maximum value for the red range
+        blueRange = 35f..50f,  // Define the maximum value for the red range
         greenRange = 50f..65f,  // Define the maximum value for the green range
-        orangeRange = 65f..115f,  // Define the maximum value for the magenta range
+        orangeRange = 65f..80f,  // Define the maximum value for the magenta range
         blueText = "Low",
         greenText = "Standard",
         orangeText = "High"
@@ -1945,13 +1970,13 @@ fun BodyFatPercentSliderPreview() {
 @Preview(showBackground = true)
 @Composable
 fun LeanBodyMassPercentSliderPreview() {
-    var sliderValue by remember { mutableStateOf(0f) }
+    var sliderValue by remember { mutableStateOf(100f) }
     LeanBodyMassPercentSlider(
         value = sliderValue,
         onValueChange = { sliderValue = it },
-        blueRange = 0f..68f,  // Define the maximum value for the red range
+        blueRange = 46f..68f,  // Define the maximum value for the red range
         greenRange = 68f..90f,  // Define the maximum value for the green range
-        orangeRange = 90f..100f,  // Define the maximum value for the magenta range
+        orangeRange = 90f..112f,  // Define the maximum value for the magenta range
         blueText = "Low",
         greenText = "Standard",
         orangeText = "High"
@@ -1961,13 +1986,13 @@ fun LeanBodyMassPercentSliderPreview() {
 @Preview(showBackground = true)
 @Composable
 fun BMRSliderPreview() {
-    var sliderValue by remember { mutableStateOf(0f) }
+    var sliderValue by remember { mutableStateOf(1850f) }
     BMRSlider(
         value = sliderValue,
         onValueChange = { sliderValue = it },
-        blueRange = 0f..1450f,  // Define the maximum value for the red range
+        blueRange = 1250f..1450f,  // Define the maximum value for the red range
         greenRange = 1450f..1650f,  // Define the maximum value for the green range
-        darkGreenRange = 1650f..3000f,  // Define the maximum value for the magenta range
+        darkGreenRange = 1650f..1850f,  // Define the maximum value for the magenta range
         blueText = "Low",
         greenText = "Good",
         darkGreenText = "Excellent"
@@ -1981,9 +2006,9 @@ fun BonePercentSliderPreview() {
     BonePercentSlider(
         value = sliderValue,
         onValueChange = { sliderValue = it },
-        blueRange = 0f..3.7f,  // Define the maximum value for the red range
-        greenRange = 3.7f..4.1f,  // Define the maximum value for the green range
-        darkGreenRange = 4.1f..6f,  // Define the maximum value for the magenta range
+        blueRange = 5f..10f,  // Define the maximum value for the red range
+        greenRange = 10f..15f,  // Define the maximum value for the green range
+        darkGreenRange = 15f..20f,  // Define the maximum value for the magenta range
         blueText = "Low",
         greenText = "Standard",
         darkGreenText = "Excellent"
@@ -1997,9 +2022,9 @@ fun ProteinPercentSliderPreview() {
     ProteinPercentSlider(
         value = sliderValue,
         onValueChange = { sliderValue = it },
-        blueRange = 0f..16f,  // Define the maximum value for the red range
+        blueRange = 11.9f..16f,  // Define the maximum value for the red range
         greenRange = 16f..20.1f,  // Define the maximum value for the green range
-        orangeRange = 20.1f..25f,  // Define the maximum value for the magenta range
+        orangeRange = 20.1f..24.2f,  // Define the maximum value for the magenta range
         blueText = "Low",
         greenText = "Standard",
         orangeText = "High"
@@ -2009,13 +2034,13 @@ fun ProteinPercentSliderPreview() {
 @Preview(showBackground = true)
 @Composable
 fun MusclePercentSliderPreview() {
-    var sliderValue by remember { mutableStateOf(0f) }
+    var sliderValue by remember { mutableStateOf(67f) }
     MusclePercentSlider(
         value = sliderValue,
         onValueChange = { sliderValue = it },
-        blueRange = 0f..73f,  // Define the maximum value for the red range
+        blueRange = 65f..73f,  // Define the maximum value for the red range
         greenRange = 73f..81f,  // Define the maximum value for the green range
-        darkGreenRange = 81f..100f,  // Define the maximum value for the magenta range
+        darkGreenRange = 81f..89f,  // Define the maximum value for the magenta range
         blueText = "Low",
         greenText = "Standard",
         darkGreenText = "Excellent"

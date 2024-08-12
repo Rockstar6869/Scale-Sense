@@ -85,7 +85,8 @@ fun Navigation(navController: NavController,
             }
             UpdateDetailScreen(onNavigateToAddDevice = {
                 navController.navigate(Screen.AddDeviceScreen.route)
-            })
+            },
+                showUnitChanger = true)
         }
         composable(Screen.AddDeviceScreen.route) {
             AddDevice( onNavigateToMainView = {
