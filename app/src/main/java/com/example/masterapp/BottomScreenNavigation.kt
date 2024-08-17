@@ -4,8 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,7 +18,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.jaikeerthick.composable_graphs.composables.line.model.LineData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -57,7 +54,8 @@ fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
 
                 HomeScreen( bleScanViewModel =  bluetoothViewModel,
                     onNavigateToHealthReport = {navController.navigate(Screen.HealthReportScreen.route)},
-                    userDetailsViewModel = userDetailsViewModel)
+                    userDetailsViewModel = userDetailsViewModel,
+                    onNavigateToAddUser = {navController.navigate(Screen.ChangeUserScreen.route)})
         }
         composable(Screen.BottomScreen.HistoryScreen.route,
 //            enterTransition =  {slideInHorizontally() }
@@ -89,8 +87,10 @@ fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
                             onUpdateDetailsClick = {navController.navigate(Screen.BottomScreenUpdateDetails.route)},
                             onChangePasswordClick = {navController.navigate(ScreenInMeScreen.ChangePassword.route)},
                             onUnitClick = {navController.navigate(ScreenInMeScreen.Unit.route)},
+                            onPrivacyPolicyClick = {navController.navigate(Screen.PrivacyPolicyScreen.route)},
                             onLogOutSuccess = onLogOutSuccess,
                             authViewModel = authViewModel,
+                            onUserManagementClick = {navController.navigate(Screen.UserManagementScreen.route)},
                             userDetailsViewModel = userDetailsViewModel)
         }
         composable(ScreenInMeScreen.MyDevices.route){
@@ -119,6 +119,27 @@ fun BottomScreenNavigation(navController: NavController,pd: PaddingValues,
         composable(ScreenInMeScreen.Unit.route){
             UnitScreen(userDetailsViewModel = userDetailsViewModel,
                 onNavigateToMeScreen = {navController.navigate(Screen.BottomScreen.MeScreen.route)})
+        }
+        composable(Screen.ChangeUserScreen.route){
+            ChangeUserScreen(userDetailsViewModel = userDetailsViewModel,
+                onNavigateBack = {navController.navigate(Screen.BottomScreen.HomeScreen.route)},
+                onNavigateToAddUser = {navController.navigate(Screen.AddUserScreen.route)})
+        }
+        composable(Screen.AddUserScreen.route){
+            AddUserScreen(userDetailsViewModel = userDetailsViewModel,
+                        onNavigateBack = {navController.navigate(Screen.BottomScreen.HomeScreen.route)})
+        }
+        composable(Screen.PrivacyPolicyScreen.route){
+            PrivacyPolicyScreen(
+                onNavigateBack = {navController.navigate(Screen.BottomScreen.MeScreen.route)}
+            )
+        }
+        composable(Screen.UserManagementScreen.route){
+            UserManagementScreen(userDetailsViewModel = userDetailsViewModel,
+                onNavigateBack = {navController.navigate(Screen.BottomScreen.MeScreen.route) },
+                onNavigateToAddUser = {
+                    navController.navigate(Screen.AddUserScreen.route)
+                })
         }
     }
 

@@ -90,6 +90,7 @@ class MainActivity : ComponentActivity() {
 //                BmiCalculatorScreen(bleScanViewModel = bluetoothViewModel)
 //                    AddDevice(bleScanViewModel = bluetoothViewModel)
 //                            MainView()
+//            DummyScreen2()
             Navigation(navController = controller, authViewModel = authViewModel)
 //           UpdateDetailScreen()
         }

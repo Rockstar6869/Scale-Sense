@@ -5,6 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import co.yml.charts.common.extensions.isNotNull
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -21,6 +23,10 @@ class UserDetailsViewModel: ViewModel() {
     val units: LiveData<Units> get() = _units
     private val _currentUser = MutableLiveData<User>()
     val currentUser: LiveData<User> get() = _currentUser
+    private val _currentSubUser = MutableLiveData<subuser>()
+    val currentSubUser: LiveData<subuser> get() = _currentSubUser
+    private val _SubUserList = MutableLiveData<List<subuser>>()
+    val SubUserList: LiveData<List<subuser>> get() = _SubUserList
 
     init{
         UserDetailRepository = UserDetailRepository(Injection.instance())
@@ -32,9 +38,73 @@ class UserDetailsViewModel: ViewModel() {
             loadcurrentuser()
         }
     }
+    fun addSubUser(subuser: subuser,ud:UserData){
+        viewModelScope.launch {
+            when(val result = UserDetailRepository.addSubUser(currentUser.value?.email?:"",subuser)){
+                is Result.Success -> {
+                    Log.d("CheckTag","${result.data}")
+                        uploadDetailsForAddUser(ud,result.data) //result returns the uuid if Success
+                        getSubUserList()
+                }
+                is Result.Error ->{
+
+                }
+            }
+        }
+    }
+
+    fun setCurrentSubUser(subUser:subuser){
+        viewModelScope.launch {
+            _currentSubUser.value = subUser
+            getCurrentSubUserData()
+            gethistlist()
+            updateUserData()
+        }
+    }
+
+    fun getCurrentSubUserData(){  //gets both userdetails and userhist of sub user
+        viewModelScope.launch {
+            getUserData(currentUser.value?.email)
+            gethistlist()
+        }
+    }
+
+    fun getSubUserList(){  //Only for the first time when app is loaded. After that use updateSubUserList
+        viewModelScope.launch {
+
+                when(val result = UserDetailRepository.getSubUserList(currentUser.value?.email?:"")){
+                    is Result.Success ->{
+                        _SubUserList.value = result.data
+                        _currentSubUser.value = SubUserList.value?.get(0)
+                        gethistlist()
+                        updateUserData()
+                    }
+                    is Result.Error ->{
+
+                    }
+                }
+        }
+    }
+    fun updateSubUserList(){
+        viewModelScope.launch {
+
+            when(val result = UserDetailRepository.getSubUserList(currentUser.value?.email?:"")){
+                is Result.Success ->{
+                    _SubUserList.value = result.data
+                    gethistlist()
+                    updateUserData()
+                }
+                is Result.Error ->{
+
+                }
+            }
+        }
+    }
+
+
     fun uploadDetails(ud: UserData) {
         viewModelScope.launch {
-            when (UserDetailRepository.uploadDetails(currentUser.value?.email?:"",ud)) {
+            when (UserDetailRepository.uploadDetails(currentUser.value?.email?:"",ud,currentSubUser.value?.uuid?:"")) { //subuseruuid to be added
                 is Result.Success -> {
                     getUserData(currentUser.value?.email)
                 }
@@ -45,10 +115,25 @@ class UserDetailsViewModel: ViewModel() {
         }
 
     }
+
+    fun uploadDetailsForAddUser(ud: UserData,useruuid:String) {  //only for add user
+        viewModelScope.launch {
+            when (UserDetailRepository.uploadDetails(currentUser.value?.email?:"",ud,useruuid)) { //subuseruuid to be added
+                is Result.Success -> {
+                    getUserData(currentUser.value?.email)
+                }
+                is Result.Error -> {
+
+                }
+            }
+        }
+
+    }
+
     fun getUserData(mailId:String?){
         viewModelScope.launch {
             if(mailId != null){
-                when(val result = UserDetailRepository.getUserData(mailId)){
+                when(val result = UserDetailRepository.getUserData(mailId,currentSubUser.value?.uuid?:"")){   //subuseruuid to be added
                     is Result.Success ->{
                         _userData.value= result.data
                         Log.d("UjTag3","${userData.value?.heightincm}")
@@ -67,10 +152,9 @@ class UserDetailsViewModel: ViewModel() {
             when (val result = userRepository.loadcurrentuser()) {
                 is Result.Success -> {
                     _currentUser.value = result.data
-                    getUserData(currentUser.value?.email)
+                    getSubUserList()
                     getUnits()
                     Log.d("UjTag12","${currentUser.value?.email}")
-                    gethistlist()
                     getDeviceList()
                     Log.d("UjTag2","${currentUser.value?.email}")
                 }
@@ -84,7 +168,7 @@ class UserDetailsViewModel: ViewModel() {
     fun updatehistlist(newHist:hist){
         viewModelScope.launch {
             if(currentUser.value?.email!=null) {
-                UserDetailRepository.updatehistlist(currentUser.value!!.email, newHist)
+                UserDetailRepository.updatehistlist(currentUser.value!!.email, newHist,currentSubUser.value?.uuid?:"")
             }
 //            getweightlist()
         }
@@ -98,7 +182,7 @@ class UserDetailsViewModel: ViewModel() {
 
     fun gethistlist(){
         viewModelScope.launch {
-            when(val result = UserDetailRepository.gethistlist(currentUser.value?.email?:"")){
+            when(val result = UserDetailRepository.gethistlist(currentUser.value?.email?:"",currentSubUser.value?.uuid?:"")){
                 is Result.Success ->{
                     _userHist.value = result.data
                 }
@@ -133,7 +217,7 @@ class UserDetailsViewModel: ViewModel() {
 
     }
     fun clearUserDataAndHist() {
-        _userData.value = UserData(heightincm = 0.0, gender = "", age = 0)
+        _userData.value = null
         _userHist.value = emptyList()
     }
 

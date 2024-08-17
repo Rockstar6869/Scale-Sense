@@ -1,26 +1,96 @@
 package com.example.masterapp
 
 import androidx.media3.common.util.Log
+import co.yml.charts.common.extensions.isNotNull
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 
 class UserDetailRepository(private val firestore: FirebaseFirestore) {
 
-    suspend fun uploadDetails(mailId:String,userData: UserData): Result<Unit> =
+    fun addSubUser(mailId:String,subuser: subuser):Result<String> =
+        try{
+            val docRef = firestore.collection("users").document(mailId).
+            collection("subuser").document("subusers")
+
+            val uuid = UUID.randomUUID().toString()
+            val userUUID = subuser.firstName+uuid
+
+            val userMap = mapOf(
+                "firstname" to subuser.firstName,
+                "lastname" to subuser.lastName,
+                "uuid" to userUUID
+            )
+
+            docRef.update("users",FieldValue.arrayUnion(userMap))
+                .addOnSuccessListener {
+                    Result.Success(userUUID)
+                }
+                .addOnFailureListener{ e->
+                    if(e.message?.contains("No document to update")==true){
+                        docRef.set(mapOf("users" to listOf(userMap)))
+                            .addOnSuccessListener {
+                                Result.Success(Unit)
+                            }
+                            .addOnFailureListener { setError ->
+
+                            }
+                    }
+                    else{
+
+                    }
+                }
+            Result.Success(userUUID)
+        }
+        catch (e:Exception){
+            Result.Error(e)
+        }
+
+    suspend fun getSubUserList(mailId: String):Result<List<subuser>> =
+        try {
+            val subUserListSnapshot = firestore.collection("users").
+            document(mailId).collection("subuser").document("subusers").get().await()
+            if(subUserListSnapshot.exists()){
+                val subUsersList = subUserListSnapshot.get("users") as? List<Map<String, Any>>
+                if(subUsersList !=null){
+                    val userList = subUsersList.map { map ->
+                        subuser(
+                            firstName = map["firstname"] as String,
+                            lastName = map["lastname"] as String,
+                            uuid = map["uuid"] as String
+                        )
+                    }
+                    Result.Success(userList)
+                }
+                else{
+                    Result.Error(Exception("user list is empty"))
+                }
+            } else{
+                Result.Error(Exception("Doc does not exist"))
+            }
+        }
+        catch (e:Exception){
+            Result.Error(e)
+        }
+
+
+    suspend fun uploadDetails(mailId:String,userData: UserData,subuseruuid: String): Result<Unit> =
         try
         {
-            firestore.collection("users").document(mailId).    //will be used for sending height, gender age in the upload detail screen
+            firestore.collection("users").document(mailId) //will be used for sending height, gender age in the upload detail screen
+                .collection("subuserdetails").document(subuseruuid).
             collection("userdetails").document("userdata").set(userData).await()
             Result.Success(Unit)
         }
         catch (E:Exception){
             Result.Error(E)
         }
-    suspend fun getUserData(mailId:String): Result<UserData> =
+    suspend fun getUserData(mailId:String,subuseruuid: String): Result<UserData> =
         try{
             val ud=firestore.collection("users").
-            document(mailId).collection("userdetails").document("userdata").get().await()
+            document(mailId).collection("subuserdetails").document(subuseruuid).
+            collection("userdetails").document("userdata").get().await()
             val userDetails = ud.toObject(UserData::class.java)
             if(userDetails!=null){
                 Result.Success(userDetails)
@@ -30,9 +100,11 @@ class UserDetailRepository(private val firestore: FirebaseFirestore) {
         } catch (e: Exception) {
             Result.Error(e)
         }
-    suspend fun updatehistlist(mailId:String,newHist:hist):Result<Unit> =
+    suspend fun updatehistlist(mailId:String,newHist:hist,subuseruuid: String):Result<Unit> =
         try{
-            val userDocRef = firestore.collection("users").document(mailId).collection("history").document("userhist")
+            val userDocRef = firestore.collection("users").document(mailId).
+                collection("subuserdetails").document(subuseruuid).collection("history").
+            document("userhist")
             userDocRef.get().addOnSuccessListener { document ->
                     if (document.contains("history")) {
                         val currentHistory = document.get("history") as List<Map<String, Any>>
@@ -105,10 +177,12 @@ class UserDetailRepository(private val firestore: FirebaseFirestore) {
 //        }catch (e: Exception) {
 //            Result.Error(e)
 //        }
-    suspend fun gethistlist(mailId:String):Result<List<hist>> =
+    suspend fun gethistlist(mailId:String,subuseruuid: String):Result<List<hist>> =
     try{
             val historyListSnapshot = firestore.collection("users")
-                .document(mailId)
+                .document(mailId).
+                collection("subuserdetails").
+                document(subuseruuid)
                 .collection("history")
                 .document("userhist").get().await()
             if(historyListSnapshot.exists()){

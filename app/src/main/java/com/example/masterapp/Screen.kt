@@ -17,6 +17,10 @@ sealed class Screen(val title:String,val route:String){
     object BottomScreenAddDevice:Screen("Add Device","bottomadddevice")
     object BottomScreenUpdateDetails:Screen("Update Details","bottomscreenupdatedetails")
     object HealthReportScreen:Screen("Health Report","healthreport")
+    object  ChangeUserScreen:Screen("Change User","bottomscreenchangeuser")
+    object  AddUserScreen:Screen("Add User","bottomscreenadduser")
+    object  UserManagementScreen:Screen("User Management","usermanagementscreen")
+    object  PrivacyPolicyScreen:Screen("Privacy Policy","privacypolicyscreen")
 
 
 }
@@ -25,6 +29,7 @@ sealed class ScreenInMeScreen(val atitle:String,val aroute:String,@DrawableRes v
     object UpdateDetails:ScreenInMeScreen("Update Details","updatedetails",R.drawable.baseline_update_24)
     object ChangePassword:ScreenInMeScreen("Change Password","changepassword",R.drawable.baseline_password_24)
     object Unit:ScreenInMeScreen("Unit","unitscreen",R.drawable.kg_weight)
+    object UserManagement:ScreenInMeScreen("User Management","bottomscreenusermanagement",R.drawable.usermanagement)
 }
 
 

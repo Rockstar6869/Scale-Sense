@@ -132,13 +132,59 @@ object Calculate {
         val Protien = Protien(Weight,BodyFatPercent)
         return (Protien+BodyWaterPercent).format(2).toDouble()
     }
+    fun StandardWeight(HeightInCM:Double,WeightInKG:Double): Double{
+        val BMI = (WeightInKG/((HeightInCM/100.0)*(HeightInCM/100.0)))
+        val HeightInM = (HeightInCM/100.0)
+        return (BMI * (HeightInM*HeightInM)).format(2).toDouble()
+    }
+    fun WeightControl(HeightInCM:Double,WeightInKG:Double):Double{
+        val StandardWeight = StandardWeight(HeightInCM,WeightInKG)
+        return (WeightInKG-StandardWeight).format(2).toDouble()
+    }
+    fun FatControlForMale(Age:Int,HeightInCM:Double,WeightInKG:Double):Double{
+        val BMI = (WeightInKG/((HeightInCM/100.0)*(HeightInCM/100.0)))
+        val BFT = BodyFatPercentforMale(Age,BMI)
+        val currentFatMass = WeightInKG * (BFT/100)
+        val idealFatMass = WeightInKG *(14/100)
+        return (currentFatMass - idealFatMass).format(2).toDouble()
+    }
+    fun FatControlForFemale(Age:Int,HeightInCM:Double,WeightInKG:Double):Double{
+        val BMI = (WeightInKG/((HeightInCM/100.0)*(HeightInCM/100.0)))
+        val BFT = BodyFatPercentforFemale(Age,BMI)
+        val currentFatMass = WeightInKG * (BFT/100)
+        val idealFatMass = WeightInKG *(26/100)
+        return (currentFatMass - idealFatMass).format(2).toDouble()
+    }
+    fun MuscscleControlForMale(Weight:Double,Age:Int,HeightInCM:Double):Double{
+        val BMI = (Weight/((HeightInCM/100.0)*(HeightInCM/100.0)))
+        val BFT = BodyFatPercentforMale(Age,BMI)
+        val lbm = LeanBodyMass(Weight,BFT)
+        val BWater = BodyWaterForMale(Age,HeightInCM,Weight)
+        val BWaterP = BodyWaterPercent(BWater,Weight)
+        val MussclePercent = MusclePercent(BWaterP,Weight,BFT)
+        val CurrentMusscleMass = lbm * MussclePercent
+        val TargetMusscleMass = lbm * 85.0
 
+        return (TargetMusscleMass - CurrentMusscleMass).format(2).toDouble()
+    }
+    fun MuscscleControlForFemale(Weight:Double,Age:Int,HeightInCM:Double):Double{
+        val BMI = (Weight/((HeightInCM/100.0)*(HeightInCM/100.0)))
+        val BFT = BodyFatPercentforFemale(Age,BMI)
+        val lbm = LeanBodyMass(Weight,BFT)
+        val BWater = BodyWaterForFemale(Age,HeightInCM,Weight)
+        val BWaterP = BodyWaterPercent(BWater,Weight)
+        val MussclePercent = MusclePercent(BWaterP,Weight,BFT)
+        val CurrentMusscleMass = lbm * MussclePercent
+        val TargetMusscleMass = lbm * 65.0
+
+        return (TargetMusscleMass - CurrentMusscleMass).format(2).toDouble()
+    }
 }
 
 
 fun isInteger(input: String): Boolean {
     return try {
-        input.toInt()
+        (input.toDouble()).toInt()
         true
     } catch (e: NumberFormatException) {
         false

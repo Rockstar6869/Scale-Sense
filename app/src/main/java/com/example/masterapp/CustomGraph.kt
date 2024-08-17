@@ -1,5 +1,7 @@
 package com.example.masterapp
 
+import android.graphics.Paint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -59,6 +62,14 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
         mutableStateOf(userHist.map { it.date })
     }
 
+    val modifiedDataPoints: List<Point> = if (dataPoints.size >= 2 && dataPoints[0].y == dataPoints[1].y) {
+        val newPoint = dataPoints[1].copy(y = dataPoints[1].y - 0.01f)
+        listOf(dataPoints[0], newPoint) + dataPoints.drop(2)
+    } else {
+        dataPoints
+    }
+    Log.d("Graphtag","$modifiedDataPoints")
+
 //    val dataPoints = userHist.mapIndexed { index , hist ->
 //        Point(x = index.toFloat(), y = hist.weight.toFloat())
 //    }
@@ -87,8 +98,8 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
     val gridLines: GridLines by remember { mutableStateOf(GridLines(initialGridLinesColor)) }
     val labelModifier = Modifier.padding(horizontal = 16.dp)
 
-    val xAxisData = remember(dataPoints, datehist) {
-        AxisData.Builder().axisStepSize(100.dp).steps(dataPoints.size - 1)
+    val xAxisData = remember(modifiedDataPoints, datehist) {
+        AxisData.Builder().axisStepSize(100.dp).steps(modifiedDataPoints.size - 1)
             .labelData { value ->
                 if (value != 0) datehist[value].substring(0, datehist[value].length - 5)
                 else ("          " + ((datehist[value].substring(0, datehist[value].length - 5))))
@@ -98,19 +109,19 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
             .axisLabelFontSize(12.sp).build()
     }
 
-    val yAxisData = remember(dataPoints, steps) {
-        AxisData.Builder().steps(steps).labelAndAxisLinePadding(20.dp).labelData { i ->
-            val yMin = dataPoints.minOf { it.y }
-            val yMax = dataPoints.maxOf { it.y }
-            val yScale = (yMax - yMin) / steps
-            ((i * yScale) + yMin).formatToSinglePrecision()
+    val yAxisData = remember(modifiedDataPoints, steps) {
+        AxisData.Builder().steps(1).labelAndAxisLinePadding(20.dp).labelData { i ->
+            val yMin = modifiedDataPoints.minOf { it.y }
+            val yMax = modifiedDataPoints.maxOf { it.y }
+            val yScale = (yMax - yMin) / 1
+            (((i * yScale) + yMin).toDouble()).format(2)
         }.axisLineColor(yAxisLineColor).axisLabelColor(Color.Black)
-//        .backgroundColor(Color.White)
+        .backgroundColor(Color.White)
             .axisLabelFontSize(12.sp).build()
     }
 
     val lineChartData = remember(
-        dataPoints,
+        modifiedDataPoints,
         chartLineColor,
         intersectionPointColor,
         xAxisLineColor,
@@ -121,7 +132,7 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
         linePlotData = LinePlotData(
             lines = listOf(
                 Line(
-                    dataPoints = dataPoints,
+                    dataPoints = modifiedDataPoints,
                     LineStyle(
                         color = LineColor,
                         lineType = LineType.SmoothCurve(isDotted = isDotted),
@@ -139,14 +150,15 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
                         )
                     ),
                     selectionHighlightPopUp = SelectionHighlightPopUp(
+                        labelAlignment = Paint.Align.LEFT,
                         popUpLabel = { x, y ->
-                            "$y $Unit"
+                            "${y.toDouble().format(2)} $Unit"
                         }
                     )
                 )
             )
         ),
-        containerPaddingEnd = 35.dp,
+        containerPaddingEnd = 80.dp,
         backgroundColor = Color.White,
         xAxisData = xAxisData,
         yAxisData = yAxisData,

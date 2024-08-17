@@ -50,6 +50,8 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,
                     onChangePasswordClick:()->Unit,
                     onUnitClick:()->Unit,
                     onLogOutSuccess:()->Unit,
+                    onPrivacyPolicyClick:()->Unit,
+                    onUserManagementClick:()->Unit,
                     userDetailsViewModel: UserDetailsViewModel = viewModel()
 ) {
     var logoutclick by remember { mutableStateOf(false) }
@@ -105,6 +107,13 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,
         }
         Spacer(modifier = Modifier.padding(vertical = 40.dp))
         Divider(color = Color.LightGray, thickness = 0.9.dp)
+        Divider(color = Color.LightGray, thickness = 0.9.dp)
+        ClickableRow(Icon = painterResource(id = ScreenInMeScreen.UserManagement.icon), textContent = {
+            Text(text = Screen.UserManagementScreen.title)
+        }) {
+            onUserManagementClick()
+        }
+        Divider(color = Color.LightGray, thickness = 1.dp)
         ClickableRow(Icon = painterResource(id = ScreenInMeScreen.MyDevices.icon), textContent = {
             Text(text = ScreenInMeScreen.MyDevices.title)
         }) {
@@ -126,6 +135,12 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,
         }
         Divider(color = Color.LightGray, thickness = 0.9.dp)
         Spacer(modifier = Modifier.padding(vertical = 40.dp))
+        Divider(color = Color.LightGray, thickness = 0.9.dp)
+        ClickableRow(Icon =  painterResource(id = R.drawable.privacy_policy_icon), textContent = { 
+            Text(text = "Privacy Policy")
+        }) {
+            onPrivacyPolicyClick()
+        }
         Divider(color = Color.LightGray, thickness = 0.9.dp)
         ClickableRow(Icon = painterResource(id = R.drawable.baseline_password_24), textContent = {
             Text(text = "Change Password")

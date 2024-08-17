@@ -8,6 +8,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
@@ -37,6 +40,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -87,15 +91,22 @@ import kotlinx.coroutines.delay
 //}
 
 @Composable
-fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLogInSuccess:() -> Unit) {
+fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLogInSuccess:() -> Unit
+    ,onNavigateToPrivacyPolicy:()->Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val result by authViewModel.authResult.observeAsState()
     var loginclick by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
 
+    var Agreed by remember { mutableStateOf(false) }
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
+
+    val homeScreenBlue by remember {
+        mutableStateOf( R.color.Home_Screen_Blue)
+    }
 
     LaunchedEffect(loginclick) {
         if(loginclick){
@@ -167,9 +178,37 @@ fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLog
                 label = "Password",
             )
             Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                Checkbox(
+                    checked = Agreed,
+                    onCheckedChange = { Agreed = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Color.Green , // Change color when checked
+                        uncheckedColor = if (Agreed) Color.Green else Color.Red, // Change color when unchecked
+                        checkmarkColor = Color.White, // Color of the checkmark
+                    )
+                )
+                Text(
+                    text = "I have read and agreed on ",
+                    color = Color.Black
+                )
+                Text(
+                    text = "Privacy Policy",
+                    color = colorResource(id = homeScreenBlue),
+                    modifier = Modifier.clickable {
+                        onNavigateToPrivacyPolicy()
+                    }
+                )
+            }
             Button(
-                onClick = { authViewModel.LogIn(email,password)
-                    loginclick = true
+                enabled = Agreed,
+                onClick = {
+                    if(email.isNotBlank() && password.isNotBlank()) {
+                        authViewModel.LogIn(email, password)
+                        loginclick = true
 //                    when(result){
 //                            is Result.Success->{
 //                                onLogInSuccess()
@@ -179,7 +218,7 @@ fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLog
 //                            }
 //                            else ->{}
 //                        }
-
+                    }
                           },
                 modifier = Modifier
                     .width(200.dp)
@@ -197,7 +236,7 @@ fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLog
         }
             Spacer(modifier = Modifier.height(16.dp))
         Text("Don't have an account? Sign up.",
-            color = Color.Blue,
+            color = colorResource(id = homeScreenBlue),
             modifier = Modifier.clickable { onNavigateTosignin() }
         )
             Spacer(modifier = Modifier.height(16.dp))

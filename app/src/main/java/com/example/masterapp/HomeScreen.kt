@@ -58,6 +58,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.substring
@@ -80,7 +81,8 @@ import kotlin.math.abs
 @Composable
 fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                userDetailsViewModel: UserDetailsViewModel = viewModel()
-                ,onNavigateToHealthReport:()->Unit){
+                ,onNavigateToHealthReport:()->Unit,
+               onNavigateToAddUser:()->Unit){
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidthDp = configuration.screenWidthDp.dp
@@ -433,16 +435,41 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                     Modifier
                         .fillMaxWidth()
                         .padding(top = 40.dp)
-                        .padding(end = 10.dp),
-                    horizontalArrangement = Arrangement.End){
-                    IconButton(onClick = { isRefreshing = true}
-                        ,
-                        Modifier
-                            .background(color = Color.Black, shape = CircleShape)
-                            .size(30.dp)) {
-                        Icon(painter = painterResource(id = R.drawable.baseline_refresh_24),
-                            contentDescription = "Refresh",
-                            tint = Color.White)
+                        .padding(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween){
+                    Row (horizontalArrangement = Arrangement.Start) {
+                        if (userDetailsViewModel.currentSubUser.value?.firstName.isNotNull()){
+                            IconButton(
+                                onClick = { onNavigateToAddUser() },
+                                Modifier
+                                    .background(color = Color.Gray, shape = CircleShape)
+                                    .size(45.dp)
+                            ) {
+                                val userinitials = "${
+                                    userDetailsViewModel.currentSubUser.value?.firstName?.get(
+                                        0
+                                    )
+                                }${userDetailsViewModel.currentSubUser.value?.lastName?.get(
+                                    0
+                                )}"
+                                Text(
+                                    text = userinitials.uppercase(),
+                                    color = Color.White
+                                )
+                            }
+                    }
+                    }
+                    Row (horizontalArrangement = Arrangement.End){
+                        IconButton(onClick = { isRefreshing = true },
+                            Modifier
+                                .background(color = Color.Black, shape = CircleShape)
+                                .size(30.dp)) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_refresh_24),
+                                contentDescription = "Refresh",
+                                tint = Color.White
+                            )
+                        }
                     }
 
                 }
@@ -544,12 +571,13 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                 val configuration = LocalConfiguration.current
                 val screenHeight = configuration.screenHeightDp.dp
                 val dynamicHeight = (screenHeight.value / 3.5).dp
-                val distancing = if(screenWidthDp<600.dp) (screenHeight.value / 54.56).dp else (screenHeight.value / 25).dp
+                val distancing = if(screenWidthDp<600.dp) (screenHeight.value / 54.56).dp else (screenHeight.value / 25).dp  //distance between the elements in the box
+                val distanceforMore = if(screenWidthDp<600.dp) (screenHeight.value / 45.56).dp else (screenHeight.value / 25).dp
                 Column (
                     Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.75f),
-                    verticalArrangement = Arrangement.Bottom,
+                        .fillMaxHeight(if(screenWidthDp<600.dp) 0.75f else 1f),
+                    verticalArrangement = if(screenWidthDp<600.dp) Arrangement.Bottom else Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally){
                     Box (
                         Modifier
@@ -687,7 +715,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                 fontSize = 15.sp,
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
                             )
-                            Spacer(modifier = Modifier.height(distancing))
+                            Spacer(modifier = Modifier.height(distanceforMore))
                             Row (Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.Center
                                 , verticalAlignment = Alignment.CenterVertically){
@@ -697,7 +725,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     color = colorResource(id = homeScreenBlue),
                                     modifier = Modifier.pointerInput(Unit) {
                                 detectTapGestures(onTap = {
-                                    if(userdata.isNotNull() && lastWeight!=0.0 ) {
+                                    if(userdata.isNotNull() && (lastWeight!=0.00 || showHealthReport== true) ) {
                                         onNavigateToHealthReport()
                                     }
                                 })}

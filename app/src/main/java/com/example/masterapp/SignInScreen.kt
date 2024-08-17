@@ -1,14 +1,16 @@
 package com.example.masterapp
 
-import android.inputmethodservice.Keyboard
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,13 +20,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -42,6 +43,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -102,7 +104,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
                  authViewModel: AuthViewModel,
-                 onSignInSuccess:()->Unit) {
+                 onSignInSuccess:()->Unit,
+                 onNavigateToPrivacyPolicy:()->Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
@@ -111,8 +114,16 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
     var signinclick by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
 
+    var Agreed by remember { mutableStateOf(false) }
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
+
+    val homeScreenBlue by remember {
+        mutableStateOf( R.color.Home_Screen_Blue)
+    }
+
+
 
     LaunchedEffect(signinclick) {
         if(signinclick){
@@ -203,13 +214,43 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
             )
             HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
             Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                Checkbox(
+                    checked = Agreed,
+                    onCheckedChange = { Agreed = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Color.Green , // Change color when checked
+                        uncheckedColor = if (Agreed) Color.Green else Color.Red, // Change color when unchecked
+                        checkmarkColor = Color.White, // Color of the checkmark
+                    )
+                )
+                Text(
+                    text = "I have read and agreed on ",
+                    color = Color.Black
+                )
+                Text(
+                    text = "Privacy Policy",
+                    color = colorResource(id = homeScreenBlue),
+                    modifier = Modifier.clickable {
+                            onNavigateToPrivacyPolicy()
+                    }
+                )
+            }
             Button(
-                onClick = {  authViewModel.signUp(email,password,firstName,lastName)
+                enabled = Agreed,
+                onClick = {
+                    if (email.isNotBlank() && password.isNotBlank() && firstName.isNotBlank() && lastName.isNotBlank()){
+                        authViewModel.signUp(email, password, firstName, lastName)
                     signinclick = true
-            email=""
-            password=""
-            firstName=""
-            lastName=""},
+                    email = ""
+                    password = ""
+                    firstName = ""
+                    lastName = ""
+                }
+                          },
                 modifier = Modifier
                     .width(200.dp)
                     .height(50.dp),
@@ -228,7 +269,7 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
         Text("Already have an account? Log in.",
             modifier = Modifier.clickable {
                 OnNavigateToLogIn()
-            }, color = Color.Blue)
+            }, color = colorResource(id = homeScreenBlue))
             Spacer(modifier = Modifier.height(16.dp))
             if(loading){
                 LinearProgressIndicator()

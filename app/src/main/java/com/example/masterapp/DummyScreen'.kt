@@ -25,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.auth.User
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -39,6 +40,12 @@ fun DummyScreen() {
     var devices by remember {
         mutableStateOf<List<themistoscale>>(emptyList())
     }
+    var userDetails by remember {
+        mutableStateOf(UserData())
+    }
+    var subUserList by remember {
+        mutableStateOf<List<subuser>>(emptyList())
+    }
     val UserDetailRepository: UserDetailRepository
     UserDetailRepository = UserDetailRepository(Injection.instance())
     var upload by remember {
@@ -51,10 +58,34 @@ fun DummyScreen() {
         )
     LaunchedEffect (upload){
         if(upload) {
-            UserDetailRepository.updatehistlist("ro@gmail.com", hist(751.33, 40000, date))
-            val data = UserDetailRepository.gethistlist("rohan@gmail.com")
-            UserDetailRepository.bindDevice("rohan@gmail.com",themistoscale("Themisto body Scale","f"))
-            val device = UserDetailRepository.getDevices("rohan@gmail.com")
+            UserDetailRepository.addSubUser("we@gmail.com", subuser("We","Yaga"))
+            val subusers = UserDetailRepository.getSubUserList("we@gmail.com")
+            UserDetailRepository.uploadDetails("we@gmail.com",
+                UserData(173.52,"Male",19),"Wee48c24a0-848a-4327-977c-280cd8a2e892"
+            )
+            val userd = UserDetailRepository.getUserData("we@gmail.com","Wee48c24a0-848a-4327-977c-280cd8a2e892")
+
+            when(userd){
+                is Result.Success -> {
+                    userDetails = userd.data
+                }
+                is Result.Error ->{
+                    Log.d("UJERROR","${userd.exception}")
+                }
+            }
+
+            UserDetailRepository.updatehistlist("we@gmail.com", hist(741.33, 40000, date),"Wee48c24a0-848a-4327-977c-280cd8a2e892")
+            val data = UserDetailRepository.gethistlist("we@gmail.com","Wee48c24a0-848a-4327-977c-280cd8a2e892")
+//            UserDetailRepository.bindDevice("rohan@gmail.com",themistoscale("Themisto body Scale","f"))
+//            val device = UserDetailRepository.getDevices("rohan@gmail.com")
+//            when(subusers){
+//                is Result.Success -> {
+//                    subUserList = subusers.data
+//                }
+//                is Result.Error ->{
+//                    Log.d("UJERROR","${subusers.exception}")
+//                }
+//            }
             when(data){
                     is Result.Success ->{
                         hist = data.data
@@ -63,14 +94,14 @@ fun DummyScreen() {
                     Log.d("UJERROR","${data.exception}")
                 }
             }
-            when(device){
-                is Result.Success ->{
-                    devices = device.data
-                }
-                is Result.Error ->{
-                    Log.d("UJERROR","${device.exception}")
-                }
-            }
+//            when(device){
+//                is Result.Success ->{
+//                    devices = device.data
+//                }
+//                is Result.Error ->{
+//                    Log.d("UJERROR","${device.exception}")
+//                }
+//            }
         }
 
     }
@@ -93,9 +124,11 @@ fun DummyScreen() {
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = date)
+//        Text(text = "{$subUserList}")
+        Text(text = "{$userDetails}")
         Text(text = "${hist}")
         Spacer(modifier = Modifier.height(12.dp))
-        Text(text = "$devices")
+//        Text(text = "$devices")
     }
 }
 
@@ -105,6 +138,7 @@ fun DummyScreen2(userDetailsViewModel: UserDetailsViewModel = viewModel()) {
     var date by remember { mutableStateOf("") }
     val hist by userDetailsViewModel.userHist.observeAsState()
     val devices by userDetailsViewModel.devices.observeAsState()
+    val SubUserList by userDetailsViewModel.SubUserList.observeAsState()
 
     Column(
         modifier = Modifier
@@ -113,11 +147,10 @@ fun DummyScreen2(userDetailsViewModel: UserDetailsViewModel = viewModel()) {
         verticalArrangement = Arrangement.Center,
     ) {
         Button(onClick = {
-            val currentDate = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(
-                Date()
-            )
-            date = currentDate
-            userDetailsViewModel.bindDevice(themistoscale("Them","adress"))
+
+            userDetailsViewModel.getSubUserList()
+
+//            userDetailsViewModel.bindDevice(themistoscale("Them","adress"))
 
         }) {
             Text(text = "Show Date")
@@ -126,7 +159,7 @@ fun DummyScreen2(userDetailsViewModel: UserDetailsViewModel = viewModel()) {
         Text(text = date)
         Text(text = "${hist}")
         Spacer(modifier = Modifier.height(12.dp))
-        Text(text = "$hist")
+        Text(text = "$SubUserList")
         Text(text = "$devices")
 
     }

@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 
 
 class UserRepository( private val auth:FirebaseAuth,
@@ -41,6 +42,20 @@ class UserRepository( private val auth:FirebaseAuth,
     private suspend fun SaveusertoFirestore(user: User){
         firestore.collection("users").document(user.email).
         set(user).await()
+
+        //To create a subUser profile of this user
+        val docRef = firestore.collection("users").document(user.email).
+        collection("subuser").document("subusers")
+
+        val uuid = UUID.randomUUID().toString()
+        val userUUID = user.firstName+uuid
+
+        val userMap = mapOf(
+            "firstname" to user.firstName,
+            "lastname" to user.lastName,
+            "uuid" to userUUID
+        )
+        docRef.set(mapOf("users" to listOf(userMap))).await()
     }
     suspend fun LogIn(email:String,
                       password:String): Result<Boolean> =
