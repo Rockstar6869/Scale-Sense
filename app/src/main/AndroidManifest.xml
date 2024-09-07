@@ -22,7 +22,7 @@
         android:theme="@style/Theme.MasterApp"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="com.ujjolch.masterapp.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:label="@string/app_name"

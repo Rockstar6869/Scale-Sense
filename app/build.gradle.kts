@@ -10,7 +10,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.masterapp"
+        applicationId = "com.ujjolch.masterapp"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
