@@ -108,5 +108,49 @@ class UserRepository( private val auth:FirebaseAuth,
             Result.Error(e)
         }
 
+    suspend fun sendVerificationEmail(): Result<Boolean> =
+        try {
+            val user = auth.currentUser
+            user?.let {
+                it.sendEmailVerification().await()
+                Result.Success(true)
+            } ?: Result.Error(Exception("User not authenticated"))
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
 
+//    suspend fun isEmailVerified(): Result<Boolean> =
+//        try {
+//            val user = auth.currentUser
+//            user?.reload()?.await() // Refresh the user to get the latest data
+//            user?.let {
+//                if (it.isEmailVerified) {
+//                    Result.Success(true)
+//                } else {
+//                    Result.Success(false)
+//                }
+//            } ?: Result.Error(Exception("User not authenticated"))
+//        } catch (e: Exception) {
+//            Result.Error(e)
+//        }
+    suspend fun isEmailVerified(email: String): Result<Boolean> =
+        try {
+            val user = auth.currentUser
+
+            // Check if the currently logged-in user's email matches the provided email
+            if (user != null && user.email == email) {
+                user.reload().await() // Refresh the user to get the latest data
+
+                if (user.isEmailVerified) {
+                    Result.Success(true)
+                } else {
+                    Result.Success(false)
+                }
+            } else {
+                Result.Error(Exception("Email does not match the authenticated user"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
 }
+

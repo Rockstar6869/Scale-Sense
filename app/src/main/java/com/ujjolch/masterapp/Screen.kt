@@ -12,6 +12,7 @@ sealed class Screen(val title:String,val route:String){
     object IntroScreen:Screen("Intro Screen","introscreen")
     object SignInScreen:Screen("Sign In Screen","signin")
     object LogInScreen:Screen("Log In Screen","login")
+    object ForgetPasswordScreen:Screen("forget password","forgetpasswordscreen")
     object AddDeviceScreen:Screen("Add Device Screen","adddevice")
     object UpdateDetailScreen:Screen("Update Detail Screen","updatedetail")
     object DOBScreen:Screen("your age","dobscreenfordetails")
@@ -29,6 +30,7 @@ sealed class Screen(val title:String,val route:String){
     object  AddDeviceCheckerScreen:Screen("Check Phone Status","adddevicecheckerscreen")
     object  NewAddDeviceScreen:Screen("Add Device","newadddevicescreen")
     object  AddDeviceNewNavigation:Screen("Add Device","newadddevicenavigation")
+    object  VerifiyEmailScreen:Screen("Verify Email","verifyemailscreen")
     object  PrivacyPolicyScreen:Screen("Privacy Policy","privacypolicyscreen")
 
 

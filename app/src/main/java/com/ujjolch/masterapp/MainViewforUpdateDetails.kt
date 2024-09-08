@@ -31,9 +31,7 @@ fun MainViewForUpdateDetails(userDetailsViewModel: UserDetailsViewModel = viewMo
     val animatedProgress by animateFloatAsState(targetValue = progress, animationSpec = tween(durationMillis = 1000))
     val navBackStackEntry by controller.currentBackStackEntryAsState()
     val currentPath = navBackStackEntry?.destination?.route
-    LaunchedEffect(true) {
-        userDetailsViewModel.loadcurrentuser()
-    }
+
     LaunchedEffect(currentPath) {
         if(currentPath == Screen.GenderScreen.route){
             progress = 0.1f

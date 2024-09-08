@@ -69,16 +69,11 @@ class MainActivity : ComponentActivity() {
                 scanBT()
 //                BleDeviceScreen( bleScanViewModel = bluetoothViewModel)
 //                BmiCalculatorScreen(bleScanViewModel = bluetoothViewModel)
-//                    AddDevice(bleScanViewModel = bluetoothViewModel)
 //                            MainView()
-//            DummyScreen2()
+//            DummyScreen3()
+//                ForgetPasswordScreen({})
             Navigation(navController = controller, authViewModel = authViewModel)
-//                AddDeviceNewNavigation(
-//                    navController = controller,
-//                    bleScanViewModel = bluetoothViewModel,
-//                    userDetailsViewModel = userDetailsViewModel
-//                )
-//           UpdateDetailScreen()
+
         }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val controller = WindowInsetsControllerCompat(window, window.decorView)

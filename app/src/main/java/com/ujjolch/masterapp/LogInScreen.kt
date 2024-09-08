@@ -90,8 +90,12 @@ import kotlinx.coroutines.delay
 //}
 
 @Composable
-fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLogInSuccess:() -> Unit
-    ,onNavigateToPrivacyPolicy:()->Unit) {
+fun LoginScreen(onNavigateTosignin:()->Unit,
+                authViewModel: AuthViewModel,
+                onVerifiedLogInSuccess:() -> Unit,
+                onUnverifiedLogInSuccess:()->Unit,
+                 onNavigateToPrivacyPolicy:()->Unit,
+                onNavigateToForgetPassword:()->Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val result by authViewModel.authResult.observeAsState()
@@ -108,20 +112,24 @@ fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLog
     }
 
     LaunchedEffect(loginclick) {
-        if(loginclick){
+        if (loginclick) {
             loading = true
-            while(loading) {
+            while (loading) {
                 when (result) {
                     is Result.Success -> {
-                        onLogInSuccess()
+                        if (authViewModel.isUserVerified()) {
+                            onVerifiedLogInSuccess()
+                        } else {
+                            onUnverifiedLogInSuccess()
+                        }
                         loading = false
                         loginclick = false
                     }
 
                     is Result.Error -> {
-                        val exceptionMessage = if( (((result as Result.Error).exception.message)?.startsWith("The supplied auth credential is incorrect"))?:false)
+                        val exceptionMessage = if ((((result as Result.Error).exception.message)?.startsWith("The supplied auth credential is incorrect")) ?: false)
                             "Incorrect email or password"
-                            else (result as Result.Error).exception?.message
+                        else (result as Result.Error).exception?.message
                         Toast.makeText(
                             context,
                             "$exceptionMessage",
@@ -138,6 +146,7 @@ fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLog
             }
         }
     }
+
 
     Box(
         modifier = Modifier
@@ -176,6 +185,16 @@ fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLog
                 onValueChange = { password = it },
                 label = "Password",
             )
+            HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
+            Spacer(modifier = Modifier.height(4.dp))
+            Row (Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End){
+                Text(text = "Forget Password?",
+                    color = colorResource(id = homeScreenBlue),
+                    modifier = Modifier.clickable {
+                        onNavigateToForgetPassword()
+                    })
+            }
             Spacer(modifier = Modifier.height(16.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -210,7 +229,7 @@ fun LoginScreen(onNavigateTosignin:()->Unit, authViewModel: AuthViewModel, onLog
                         loginclick = true
 //                    when(result){
 //                            is Result.Success->{
-//                                onLogInSuccess()
+//                                onVerifiedLogInSuccess()
 //                            }
 //                            is Result.Error ->{
 //

@@ -54,6 +54,7 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,
                     onLanguageClick:()->Unit,
                     userDetailsViewModel: UserDetailsViewModel = viewModel()
 ) {
+    val isVerified by authViewModel.isVerified.observeAsState()
     var logoutclick by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
     val result by authViewModel.authResult.observeAsState()
@@ -174,6 +175,7 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,
             logoutclick = true
         }
         Divider(color = Color.LightGray, thickness = 0.9.dp)
+//        Text(text = "${isVerified}")
 
         Spacer(modifier = Modifier.padding(vertical = 50.dp))
         if (loading) {

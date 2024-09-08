@@ -1,9 +1,11 @@
 package com.ujjolch.masterapp
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.yml.charts.common.extensions.isNotNull
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +39,9 @@ class AuthViewModel : ViewModel() {
         initialValue = false
     )
 
+    private val _isVerified = MutableLiveData<Result<Boolean>>()
+    val isVerified: LiveData<Result<Boolean>> get() = _isVerified
+
     fun signUp(email: String, password: String, firstName: String, lastName: String) {
         viewModelScope.launch {
             _authResult.value = userRepository.SignUp(firstName,lastName,password,email)
@@ -60,5 +65,41 @@ class AuthViewModel : ViewModel() {
     }
     fun resetChangePasswordResult() {
         _changePasswordResult.value = null
+    }
+    fun sendVerificationEmail(){
+        viewModelScope.launch {
+            userRepository.sendVerificationEmail()
+        }
+    }
+    suspend fun checkIfVerified(email:String){
+        viewModelScope.launch {
+            _isVerified.value = userRepository.isEmailVerified(email)
+
+        }
+    }
+    fun isUserVerified(): Boolean {   //Much faster method for checking if user is verified or not
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        return currentUser?.isEmailVerified ?: false
+    }
+
+    // Function to reset isVerified
+    fun resetIsVerified() {
+        _isVerified.value = null
+    }
+
+    fun resetPassword(   //For sending email on forget password
+        email: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val auth = FirebaseAuth.getInstance()
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess()
+                } else {
+                    task.exception?.message?.let { onFailure(it) }
+                }
+            }
     }
 }
