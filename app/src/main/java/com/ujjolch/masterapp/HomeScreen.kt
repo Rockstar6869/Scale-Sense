@@ -1007,4 +1007,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                 }
             }
         }
-    }}}}
+    }
+        }
+        SnackBarForHomeScreen()
+    }}

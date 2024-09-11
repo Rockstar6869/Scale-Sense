@@ -12,6 +12,13 @@ import android.net.ConnectivityManager
 import java.text.NumberFormat
 import java.util.Locale
 import android.provider.Settings
+import android.util.Log
+import co.yml.charts.common.extensions.isNotNull
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
+import com.ujjolch.masterapp.Result
+import kotlinx.coroutines.tasks.await
 
 fun isBluetoothEnabled(context: Context): Boolean {
     val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -112,4 +119,72 @@ fun restartActivity(context: Context) {
     intent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     context.startActivity(intent)
 
+}
+
+fun isUserSignedInWithGoogle(): Boolean {
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
+    // Check if the user is signed in
+    currentUser?.let {
+        // Loop through the provider data to see if Google is one of them
+        for (userInfo in it.providerData) {
+            if (userInfo.providerId == GoogleAuthProvider.PROVIDER_ID) {
+                return true
+            }
+        }
+    }
+    // Return false if Google is not found among the providers
+    return false
+}
+
+suspend fun checkIfFirstTimeUser(): Result<Boolean> {
+    val currentUser = FirebaseAuth.getInstance().currentUser?.email
+    val db = FirebaseFirestore.getInstance()
+
+    return try {
+        if (currentUser != null) {
+            val userDocRef = db.collection("users").document(currentUser)
+                .collection("googlesignin").document("gs")
+
+            val document = userDocRef.get().await() // Await for the result
+
+            if (document.exists()) {
+                // User has signed in before
+                Log.d("SignInCheck", "User is not signing in for the first time.")
+                Result.Success(false)
+            } else {
+                // First time sign-in
+                Log.d("SignInCheck", "User is signing in for the first time.")
+                createUserRecord() // Create user record asynchronously
+                Result.Success(true)
+            }
+        } else {
+            Result.Success(false)
+        }
+    } catch (e: Exception) {
+        Log.d("SignInCheck", "Error checking user document", e)
+        Result.Error(e)
+    }
+}
+
+fun createUserRecord() {
+    val currentUser = FirebaseAuth.getInstance().currentUser?.email
+    val db = FirebaseFirestore.getInstance()
+
+    val newUser = hashMapOf(
+        "no" to 1,
+        "s" to 2
+        // Add other user data as necessary
+    )
+
+    if(currentUser.isNotNull()) {
+        db.collection("users").document(currentUser!!).collection("googlesignin").
+        document("gs")
+            .set(newUser)
+            .addOnSuccessListener {
+                Log.d("SignInCheck", "User record created successfully.")
+            }.addOnFailureListener { exception ->
+                Log.d("SignInCheck", "Error creating user record", exception)
+            }
+    }
 }

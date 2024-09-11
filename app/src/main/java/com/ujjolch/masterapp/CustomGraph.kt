@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -35,8 +36,9 @@ import co.yml.charts.ui.linechart.model.ShadowUnderLine
 import com.example.masterapp.R
 
 @Composable
-fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
-                Unit:String) {
+fun CustomGraph(datehist: List<String>,dataPoints:List<Point>,
+                Unit:String,selectedTimeRange:Int) {
+
     val initialColor = Color.Blue
     val AxisColor = Color.Black
     val HighlightPointColor = MaterialTheme.colorScheme.secondary
@@ -51,9 +53,7 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
     var yAxisLineColor by remember { mutableStateOf(AxisColor) }
     var intersectionPointColor by remember { mutableStateOf(LineColor) }
 
-    val datehist by remember(userHist) {
-        mutableStateOf(userHist.map { it.date })
-    }
+
 
     val modifiedDataPoints: List<Point> = if (dataPoints.size >= 2 && dataPoints[0].y == dataPoints[1].y) {
         val newPoint = dataPoints[1].copy(y = dataPoints[1].y - 0.01f)
@@ -91,18 +91,21 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
     val gridLines: GridLines by remember { mutableStateOf(GridLines(initialGridLinesColor)) }
     val labelModifier = Modifier.padding(horizontal = 16.dp)
 
-    val xAxisData = remember(modifiedDataPoints, datehist) {
+    val xAxisData =
+        remember(modifiedDataPoints, datehist,selectedTimeRange)
+    {
         AxisData.Builder().axisStepSize(100.dp).steps(modifiedDataPoints.size - 1)
             .labelData { value ->
-                if (value != 0) datehist[value].substring(0, datehist[value].length - 5)
-                else ("          " + ((datehist[value].substring(0, datehist[value].length - 5))))
+                if (value != 0) datehist[value]
+                else ("          " + ((datehist[value])))
             }.labelAndAxisLinePadding(15.dp)
             .axisLineColor(xAxisLineColor).axisLabelColor(Color.Black)
             .backgroundColor(Color.White)
             .axisLabelFontSize(12.sp).build()
     }
 
-    val yAxisData = remember(modifiedDataPoints, steps) {
+
+    val yAxisData = remember(modifiedDataPoints, steps,selectedTimeRange) {
         AxisData.Builder().steps(1).labelAndAxisLinePadding(20.dp).labelData { i ->
             val yMin = modifiedDataPoints.minOf { it.y }
             val yMax = modifiedDataPoints.maxOf { it.y }
@@ -115,6 +118,7 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
 
     val lineChartData = remember(
         modifiedDataPoints,
+        selectedTimeRange,
         chartLineColor,
         intersectionPointColor,
         xAxisLineColor,
@@ -166,7 +170,8 @@ fun CustomGraph(userHist: List<hist>,dataPoints:List<Point>,
     Box (
         Modifier
             .fillMaxSize()
-            .padding(bottom = 230.dp)
+            .padding(),
+        contentAlignment = Alignment.Center
     ){
         LineChart(
             modifier = Modifier

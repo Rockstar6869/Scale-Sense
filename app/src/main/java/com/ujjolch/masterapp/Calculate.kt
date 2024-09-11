@@ -228,4 +228,15 @@ object NumberFormatter {
     // Add more formatting functions as needed
 }
 
+fun valuesForCentring(value: Double): Pair<Double, Double> {
+    // Calculate half of the input value
+    val halfValue = value / 2.0
+
+    // Calculate the result by adding the half value to the original value
+    val addedValue = value + halfValue
+
+    // Return both the added value and the half value
+    return Pair(halfValue,addedValue)
+}
+
 

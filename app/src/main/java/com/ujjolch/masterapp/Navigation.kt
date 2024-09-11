@@ -1,5 +1,6 @@
 package com.ujjolch.masterapp
 
+import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ fun Navigation(navController: NavController,
         mutableStateOf(false)
     }
     val context = LocalContext.current
+    val activity = context as? Activity
     val currentLang = getSavedLanguage(context)
 
 //    LaunchedEffect(isVerified) {
@@ -128,7 +130,8 @@ fun Navigation(navController: NavController,
                 onVerifiedLogInSuccess = { navController.navigate(Screen.MainView.route) },
                 onUnverifiedLogInSuccess = {navController.navigate(Screen.VerifiyEmailScreen.route)},
                 onNavigateToPrivacyPolicy = { navController.navigate(Screen.PrivacyPolicyScreen.route)},
-                onNavigateToForgetPassword = {navController.navigate(Screen.ForgetPasswordScreen.route)})
+                onNavigateToForgetPassword = {navController.navigate(Screen.ForgetPasswordScreen.route)},
+                onGoogleFirstTimeLogIn = {navController.navigate(Screen.MainViewForUpdateDetails.route)})
         }
 //        composable(Screen.UpdateDetailScreen.route) {
 //            BackHandler {
@@ -146,7 +149,15 @@ fun Navigation(navController: NavController,
             MainViewForUpdateDetails(
                 showBackButton = false,
                 onNavigateBack = {},
-                onSave = {navController.navigate(Screen.AddDeviceNewNavigation.route)})
+                onSave = {
+                    if(hasBluetoothPermissions(context) && hasLocationPermissions(context)) {
+                        navController.navigate(Screen.AddDeviceNewNavigation.route)
+                    }
+                    else{
+                        navController.navigate(Screen.MainView.route)
+                    }
+                }
+            )
         }
 //        composable(Screen.AddDeviceScreen.route) {
 //            AddDevice( onNavigateToMainView = {

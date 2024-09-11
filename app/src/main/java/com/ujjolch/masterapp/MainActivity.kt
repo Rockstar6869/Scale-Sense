@@ -66,11 +66,11 @@ class MainActivity : ComponentActivity() {
             val authViewModel: AuthViewModel = viewModel()
             val controller: NavController = rememberNavController()
             bluetoothViewModel.getPairedDevices()
-                scanBT()
+//                scanBT()
 //                BleDeviceScreen( bleScanViewModel = bluetoothViewModel)
 //                BmiCalculatorScreen(bleScanViewModel = bluetoothViewModel)
 //                            MainView()
-//            DummyScreen3()
+//            DummyScreen4()
 //                ForgetPasswordScreen({})
             Navigation(navController = controller, authViewModel = authViewModel)
 

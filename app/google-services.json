@@ -9,10 +9,31 @@
       "client_info": {
         "mobilesdk_app_id": "1:46122252156:android:2127a9ec2275e8449b96f9",
         "android_client_info": {
-          "package_name": "com.ujjolch.masterapp"
+          "package_name": "com.example.masterapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "46122252156-bm5ghkdq757509u88ddb31hjflh8sk6i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.masterapp",
+            "certificate_hash": "0aa16fe941a60ccc56ddf6c4ea989833cf15d1e5"
+          }
+        },
+        {
+          "client_id": "46122252156-suheijpgntsfoue6cjhf01ako08tconn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.masterapp",
+            "certificate_hash": "2f68466eb57ae0d1bf18ebcb3d76d593899e4b03"
+          }
+        },
+        {
+          "client_id": "46122252156-3es5hpveanl8gv274sn1dd4uafgrrs0h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCRsWDRSVHmEzONrvA12ZN7_DMiIupGC9s"
@@ -20,7 +41,49 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "46122252156-3es5hpveanl8gv274sn1dd4uafgrrs0h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46122252156:android:ccbb8b238ab9ed859b96f9",
+        "android_client_info": {
+          "package_name": "com.ujjolch.masterapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "46122252156-c098slg2a0fn6hsv76ruhsncc0na8ia7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ujjolch.masterapp",
+            "certificate_hash": "0aa16fe941a60ccc56ddf6c4ea989833cf15d1e5"
+          }
+        },
+        {
+          "client_id": "46122252156-3es5hpveanl8gv274sn1dd4uafgrrs0h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRsWDRSVHmEzONrvA12ZN7_DMiIupGC9s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "46122252156-3es5hpveanl8gv274sn1dd4uafgrrs0h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

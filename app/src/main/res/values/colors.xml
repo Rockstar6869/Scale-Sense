@@ -21,4 +21,6 @@
     <color name="Slider_DarkGreen">#00945a</color>
     <color name="Slider_Orange">#f88206</color>
     <color name="Icon_Tint">#CCCCCC</color>
+    <color name="SnackBar_Color">#ff4500</color>
+
 </resources>

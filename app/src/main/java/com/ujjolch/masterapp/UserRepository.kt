@@ -3,6 +3,7 @@ package com.ujjolch.masterapp
 import android.util.Log
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -152,5 +153,38 @@ class UserRepository( private val auth:FirebaseAuth,
         } catch (e: Exception) {
             Result.Error(e)
         }
+    suspend fun firebaseAuthWithGoogle(idToken: String): Result<Boolean> = try {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        val authResult = auth.signInWithCredential(credential).await()
+
+        // Get user details from FirebaseUser
+        val user = authResult.user
+        val firstName = user?.displayName?.split(" ")?.firstOrNull() ?: ""
+        val lastName = user?.displayName?.split(" ")?.lastOrNull() ?: ""
+        val email = user?.email ?: ""
+        val usertosave = User(firstName,lastName,email.lowercase())
+        when(val result = checkIfFirstTimeUser()){
+            is Result.Success ->{
+                if(result.data == true){
+                    androidx.media3.common.util.Log.d("FB125", "working")
+                    SaveusertoFirestore(usertosave)
+                }
+                else{
+                    androidx.media3.common.util.Log.d("FB125", "not working")
+                }
+            }
+
+            is Result.Error -> {
+                androidx.media3.common.util.Log.d("FB125", "Not working:${result.exception}")
+            }
+        }
+
+
+
+        Result.Success(true)
+    } catch (e: Exception) {
+        androidx.media3.common.util.Log.d("FB125", "$e")
+        Result.Error(e)
+    }
 }
 

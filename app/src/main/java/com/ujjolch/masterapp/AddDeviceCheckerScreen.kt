@@ -19,11 +19,7 @@ import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
@@ -42,7 +38,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import co.yml.charts.common.extensions.isNotNull
 import com.example.masterapp.R
 import kotlinx.coroutines.delay
 
@@ -61,9 +56,21 @@ fun AddDeviceCheckerScreen(onNavigateToAddDeviceScreen:()->Unit,
     var progressnet by remember { mutableStateOf(0f) }
 
     var buttonClick by remember { mutableStateOf(0) }
+
+    var checkBTAndRestart by remember { mutableStateOf(0) }
+    var checkLocAndRestart by remember { mutableStateOf(0) }
+    var checkNetAndRestart by remember { mutableStateOf(0) }
+
+
     var isBluetoothEnabled by remember { mutableStateOf(false) }
+    var isBluetoothEnabled2 by remember { mutableStateOf(false) }
+
     var isLocEnabled by remember { mutableStateOf(false) }
+    var isLocEnabled2 by remember { mutableStateOf(false) }
+
     var isNetEnabled by remember { mutableStateOf(false) }
+    var isNetEnabled2 by remember { mutableStateOf(false) }
+
 
     // Animate progress from 0 to 1
     val animatedProgressbt by animateFloatAsState(
@@ -101,10 +108,52 @@ fun AddDeviceCheckerScreen(onNavigateToAddDeviceScreen:()->Unit,
         // Start animation to 1f
         progressbt = 1f
     }
+    LaunchedEffect(Unit) {
+        while(true){
+            isBluetoothEnabled2 = isBluetoothEnabled(context)
+            isLocEnabled2 = isLocationEnabled(context)
+            isNetEnabled2 = isInternetAvailable(context)
+            delay(1000)
+        }
+    }
+    LaunchedEffect(checkBTAndRestart) {
+        if(checkBTAndRestart>0) {
+            while(true) {
+                if (isBluetoothEnabled2) {
+                    buttonClick++
+                    checkBTAndRestart= 0
+                }
+                delay(1000)
+            }
+        }
+    }
+    LaunchedEffect(checkLocAndRestart) {
+        if(checkLocAndRestart>0) {
+            while(true) {
+                if (isLocEnabled2) {
+                    buttonClick++
+                    checkLocAndRestart= 0
+                }
+                delay(1000)
+            }
+        }
+    }
+    LaunchedEffect(checkNetAndRestart) {
+        if(checkNetAndRestart>0) {
+            while(true) {
+                if (isNetEnabled2) {
+                    buttonClick++
+                    checkNetAndRestart= 0
+                }
+                delay(1000)
+            }
+        }
+    }
     LaunchedEffect(animatedProgressbt) {
         if (animatedProgressbt == 1f && isBluetoothEnabled == false) {
             (context as? Activity)?.let { activity ->
                 requestEnableBluetooth(activity)
+                checkBTAndRestart++
             }
         }
         if (isLocationEnabled(context)) {
@@ -120,6 +169,7 @@ fun AddDeviceCheckerScreen(onNavigateToAddDeviceScreen:()->Unit,
         if (animatedProgressLoc == 1f && isLocEnabled == false) {
             (context as? Activity)?.let { activity ->
                 requestEnableLocation(activity)
+                checkLocAndRestart++
             }
         }
         isNetEnabled = isInternetAvailable(context)
@@ -132,6 +182,7 @@ fun AddDeviceCheckerScreen(onNavigateToAddDeviceScreen:()->Unit,
         if (animatedProgressNet == 1f && !isNetEnabled) {
             (context as? Activity)?.let { activity ->
                 openWiFiSettings(activity)
+                checkNetAndRestart++
             }
         }
     }

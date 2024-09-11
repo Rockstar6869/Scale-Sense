@@ -15,10 +15,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Scaffold
 import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +32,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,9 +52,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()){
+fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()) {
     val homeScreenBlue by remember {
-        mutableStateOf( R.color.Home_Screen_Blue)
+        mutableStateOf(R.color.Home_Screen_Blue)
     }
     val homeScreenWhite by remember {
         mutableStateOf(R.color.Home_Screen_White)
@@ -57,106 +63,200 @@ fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()){
         mutableStateOf(R.color.Tab_UnSelected)
     }
     val selectedTabIndex = remember { mutableStateOf(0) }
+    var selectedTimeRange by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
 
     val userdata by userDetailsViewModel.userData.observeAsState()
     val age by userDetailsViewModel.age.observeAsState()
-    val userHist  by userDetailsViewModel.userHist.observeAsState()
-    val weighthist = userHist?.map { it.weight } ?: listOf(1.2,1.2)
+    val userHist by userDetailsViewModel.userHist.observeAsState()
+    val weighthist = userHist?.map { it.weight } ?: listOf(1.2, 1.2)
     val impedancehist = userHist?.map { it.impedance } ?: listOf(1)
     val userUnits by userDetailsViewModel.units.observeAsState()
 
-    LaunchedEffect(true){
+    LaunchedEffect(true) {
         withContext(Dispatchers.IO) {
             userDetailsViewModel.gethistlist()
         }
     }
 
-
-    Box(modifier = Modifier
-        .fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(modifier = Modifier.padding(top = 60.dp))
-            Text(
-                text = stringResource(id = R.string.History),
-                    fontWeight = FontWeight.Bold,
-                fontSize = 40.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
+    Scaffold(
+        topBar = {
+            Column{
+            TopAppBar(
+                title = {
+                    Row(
+                        Modifier
+                            .fillMaxWidth(), horizontalArrangement = Arrangement.Center
+                    ) {
+                        androidx.compose.material.Text(
+                            text = stringResource(id = R.string.History),
+                            color = Color.Black
+                        )
+                    }
+                },
+                backgroundColor = Color.White,
+                modifier = Modifier
+                    .height(80.dp)
+                    .padding(top = 25.dp),
+                elevation = 0.dp
             )
-            HorizontalDivider(thickness = 1.dp, color = Color.Black, modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp))
-            Spacer(modifier = Modifier.padding(top = 80.dp))
+                TimeRow(onSelect = {
+                    if(it == "Day"){
+                        selectedTimeRange = 0
+                    }
+                    else if(it == "Month"){
+                        selectedTimeRange = 1
+                    }
+                    else if(it == "Year"){
+                        selectedTimeRange = 2
+                    }
 
-                if(!userHist.isNotNull()){}
-                else if (userHist.isNotNull() && (userHist?.size)!!< 2) {
-                    Spacer(modifier = Modifier.padding(top = 120.dp))
-                    Text(
-                        text = "You Need To Measure your Weight For at Least 2 days to See your History Graph",
-                        modifier = Modifier.padding(8.dp),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
                 }
+                )
+        }
+        },
+        content = {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(it)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+//            Spacer(modifier = Modifier.padding(top = 60.dp))
+//            Text(
+//                text = stringResource(id = R.string.History),
+//                    fontWeight = FontWeight.Bold,
+//                fontSize = 40.sp,
+//                modifier = Modifier.padding(bottom = 16.dp)
+//            )
+//            HorizontalDivider(thickness = 1.dp, color = Color.Black, modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp))
+//            Spacer(modifier = Modifier.padding(top = 80.dp))
+
+            if (!userHist.isNotNull()) {
+
+            }
+//                else if (userHist.isNotNull() && (userHist?.size)!!< 2) {
+//                    Spacer(modifier = Modifier.padding(top = 120.dp))
+//                    Text(
+//                        text = "You Need To Measure your Weight For at Least 2 days to See your History Graph",
+//                        modifier = Modifier.padding(8.dp),
+//                        fontWeight = FontWeight.Bold,
+//                        fontSize = 20.sp
+//                    )
+//                }
             else {
-
-
-                    // Content based on selected tab
-                    when (selectedTabIndex.value) {
-                        0 -> if (!userHist.isNullOrEmpty()) {
-                            WeightGraph(userHist = userHist!!,userUnits?.weightunit?:"Kg")
+//                if(userHist.isNotNull()) {
+//
+//                    Text("${(getMonthsAndYears(userHist!!))}")
+//                }
+                // Content based on selected tab
+                when (selectedTabIndex.value) {
+                    0 -> if (!userHist.isNullOrEmpty()) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                                .padding(bottom = 190.dp)
+                        ) {
+                            WeightGraph(userHist = userHist!!, userUnits?.weightunit ?: "kg",selectedTimeRange)
                         }
+                    }
 
-                        1 -> if (!userHist.isNullOrEmpty()) {
+                    1 -> if (!userHist.isNullOrEmpty()) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                                .padding(bottom = 190.dp)
+                        ) {
                             BMIGraph(
                                 userHist = userHist!!,
-                                HeightInCM = userdata?.heightincm ?: 0.0
+                                HeightInCM = userdata?.heightincm ?: 0.0,
+                                selectedTimeRange
                             )
                         }
+                    }
 
-                        2 -> if (!userHist.isNullOrEmpty()) {
+                    2 -> if (!userHist.isNullOrEmpty()) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                                .padding(bottom = 190.dp)
+                        ) {
                             BodyWaterPercentGraph(
                                 userHist = userHist!!,
                                 HeightInCM = userdata?.heightincm ?: 0.0,
                                 Age = age ?: 0,
-                                Gender = if (userdata?.gender == "Male") "M" else "F"
+                                Gender = if (userdata?.gender == "Male") "M" else "F",
+                                selectedTimeRange
                             )
                         }
+                    }
 
-                        3 -> if (!userHist.isNullOrEmpty()) {
+                    3 -> if (!userHist.isNullOrEmpty()) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                                .padding(bottom = 190.dp)
+                        ) {
                             BodyFatPercentGraph(
                                 userHist = userHist!!,
                                 HeightInCM = userdata?.heightincm ?: 0.0,
                                 Age = age ?: 0,
-                                Gender = if (userdata?.gender == "Male") "M" else "F"
+                                Gender = if (userdata?.gender == "Male") "M" else "F",
+                                selectedTimeRange
                             )
                         }
+                    }
 
-                        4 -> if (!userHist.isNullOrEmpty()) {
+                    4 -> if (!userHist.isNullOrEmpty()) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                                .padding(bottom = 190.dp)
+                        ) {
                             SkeletalMuscleGraph(
                                 userHist = userHist!!,
                                 HeightInCM = userdata?.heightincm ?: 0.0, Age = age ?: 0,
-                                Gender = if (userdata?.gender == "Male") "M" else "F"
+                                Gender = if (userdata?.gender == "Male") "M" else "F",
+                                selectedTimeRange
                             )
                         }
+                    }
 
-                        5 -> if (!userHist.isNullOrEmpty()) {
+                    5 -> if (!userHist.isNullOrEmpty()) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                                .padding(bottom = 190.dp)
+                        ) {
                             LeanBodyMassGraph(
                                 userHist = userHist!!,
                                 Age = age ?: 0,
                                 HeightInCM = userdata?.heightincm ?: 0.0,
-                                Gender = if (userdata?.gender == "Male") "M" else "F"
+                                Gender = if (userdata?.gender == "Male") "M" else "F",
+                                selectedTimeRange
                             )
                         }
+                    }
 
-                        6 -> if (!userHist.isNullOrEmpty()) {
+                    6 -> if (!userHist.isNullOrEmpty()) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                                .padding(bottom = 190.dp)
+                        ) {
                             BMRGraph(
                                 userHist = userHist!!,
                                 Age = age ?: 0,
                                 HeightInCM = userdata?.heightincm ?: 0.0,
-                                Gender = if (userdata?.gender == "Male") "M" else "F"
+                                Gender = if (userdata?.gender == "Male") "M" else "F",
+                                selectedTimeRange
                             )
                         }
                     }
+                }
             }
         }
 
@@ -191,12 +291,15 @@ fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()){
                         },
                         text = null,
                         icon = {
-                            Column(verticalArrangement = Arrangement.Top){
-                                if(isSelected){
-                                    HorizontalDivider(color =colorResource(id = homeScreenBlue),
-                                        thickness = 4.dp)
+                            Column(verticalArrangement = Arrangement.Top) {
+                                if (isSelected) {
+                                    HorizontalDivider(
+                                        color = colorResource(id = homeScreenBlue),
+                                        thickness = 4.dp
+                                    )
 
-                                }                            }
+                                }
+                            }
                             val tint = if (isSelected) colorResource(id = homeScreenBlue)
                             else Color.Black
                             Column(
@@ -217,8 +320,9 @@ fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()){
                                 ) {
                                     Text(
                                         text = stringResource(id = tab.title),
-                                        textAlign = TextAlign.Center)
-                                    }
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         }
                     )
@@ -235,4 +339,6 @@ fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()){
             }
         }
     }
+}
+)
 }

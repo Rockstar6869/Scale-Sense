@@ -1,6 +1,10 @@
 package com.ujjolch.masterapp
 
+import android.app.Activity
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +26,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.yml.charts.common.extensions.isNotNull
 import com.example.masterapp.R
 import kotlinx.coroutines.delay
 
@@ -92,6 +99,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun LoginScreen(onNavigateTosignin:()->Unit,
                 authViewModel: AuthViewModel,
+                onGoogleFirstTimeLogIn:()-> Unit,
                 onVerifiedLogInSuccess:() -> Unit,
                 onUnverifiedLogInSuccess:()->Unit,
                  onNavigateToPrivacyPolicy:()->Unit,
@@ -100,15 +108,88 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
     var password by remember { mutableStateOf("") }
     val result by authViewModel.authResult.observeAsState()
     var loginclick by remember { mutableStateOf(false) }
+    var loginclickforgoogle by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
+    var loadingforgoogle by remember { mutableStateOf(false) }
+    var resultCodeForGoogle by remember { mutableStateOf(0) }
 
     var Agreed by remember { mutableStateOf(false) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
+    val activity = context as? Activity
 
     val homeScreenBlue by remember {
         mutableStateOf( R.color.Home_Screen_Blue)
+    }
+    var hasbltpermission by remember {
+        mutableStateOf(false)
+    }
+    // GoogleSignInManager instance
+    val googleSignInManager = GoogleSignInManager(context)
+    val authResultforgoogle by googleSignInManager.authResult.observeAsState()
+
+    // Remember launcher for activity result
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                Log.d("FB125", "Activity Result OK")
+                googleSignInManager.handleSignInResult(
+                    requestCode = GoogleSignInManager.RC_SIGN_IN,
+                    resultCode = result.resultCode,
+                    data = result.data
+                )
+                resultCodeForGoogle = -1
+            } else {
+//                val extras = result.data?.extras
+//                if (extras != null) {
+//                    for (key in extras.keySet()) {
+//                    }
+//                }
+            }
+        }
+    )
+    LaunchedEffect(loginclickforgoogle,resultCodeForGoogle) {
+        if(loginclickforgoogle) {
+            loadingforgoogle =true
+            while (resultCodeForGoogle == -1) {
+                loading = true
+               if(isUserSignedInWithGoogle()) {
+                   when(val result = checkIfFirstTimeUser()){
+                       is Result.Success ->{
+                           if(result.data == true){
+                               onGoogleFirstTimeLogIn()
+                               loginclickforgoogle = false
+                           }
+                           else{
+                               onVerifiedLogInSuccess()
+                               loginclickforgoogle = false
+                           }
+                       }
+
+                       is Result.Error -> {
+                           onVerifiedLogInSuccess()
+                       }
+                   }
+               }
+                delay(100)
+            }
+        }
+    }
+    LaunchedEffect(authResultforgoogle) {  //Running with a delay so we cant use it for navigation will use it giving error messages
+        when(authResultforgoogle){
+            is Result.Success -> {
+
+            }
+            is Result.Error -> {
+                Toast.makeText(context,"Log in failed",Toast.LENGTH_SHORT).show()
+                loading = false
+                loadingforgoogle = false
+            }
+
+            null -> {}
+        }
     }
 
     LaunchedEffect(loginclick) {
@@ -146,6 +227,33 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
             }
         }
     }
+    LaunchedEffect(Unit) {
+        while(!hasbltpermission){
+            if(activity.isNotNull()) {
+                hasbltpermission = hasBluetoothPermissions(activity!!)
+            }
+            delay(2000)
+        }
+    }
+    LaunchedEffect(Unit) {
+        if(activity.isNotNull()) {
+            if (!hasBluetoothPermissions(activity!!)) {
+                    requestBluetoothPermissionsWithoutNavigation(activity)
+            }
+            if(!hasLocationPermissions(activity!!)){
+                requestLocationPermissionsWithoutNavigation(activity)
+            }
+        }
+    }
+    LaunchedEffect(hasbltpermission) {
+        if(activity.isNotNull()) {
+            if (hasbltpermission && !hasLocationPermissions(activity!!)) {
+                requestLocationPermissionsWithoutNavigation(activity)
+
+            }
+        }
+
+    }
 
 
     Box(
@@ -180,7 +288,7 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
             )
             HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
             Spacer(modifier = Modifier.height(16.dp))
-            TransparentTextField(
+            TransparentTextFieldForPassword(
                 value = password,
                 onValueChange = { password = it },
                 label = "Password",
@@ -261,7 +369,22 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
             if(loading){
                 LinearProgressIndicator()
             }
+//            Text(text = "$authResultforgoogle")
     }
+        Row (
+            Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 10.dp)){
+            IconButton(onClick = {
+                val signinIntent = googleSignInManager.googleSignInClient.signInIntent
+                launcher.launch(signinIntent)
+                loginclickforgoogle = true
+            }) {
+                Image(painter = painterResource(id = R.drawable.google_icon),
+                    contentDescription = "google sign in")
+            }
+
+        }
 }
 }
 

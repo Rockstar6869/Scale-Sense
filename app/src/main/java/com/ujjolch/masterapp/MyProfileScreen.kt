@@ -1,5 +1,7 @@
 package com.ujjolch.masterapp
 
+import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -60,6 +62,8 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,
     val result by authViewModel.authResult.observeAsState()
     val context = LocalContext.current
     val userdata by userDetailsViewModel.currentUser.observeAsState()
+    val googleSignInManager = GoogleSignInManager(context)
+    val activity = context as? Activity
     LaunchedEffect(true) {
         userDetailsViewModel.getCurrentSubUserData()
     }
@@ -170,6 +174,13 @@ fun MyProfileScreen(onMyDevicesClick:()->Unit,
             },
             tint = Color.Red
         ) {
+            if (activity != null) {
+                // Launch the sign-in intent
+                if(isUserSignedInWithGoogle()){
+                    Log.d("FB125","Yes")
+                    googleSignInManager.signOut(activity)
+                }
+            }
             authViewModel.LogOut()
             userDetailsViewModel.clearUserDataAndHist()
             logoutclick = true

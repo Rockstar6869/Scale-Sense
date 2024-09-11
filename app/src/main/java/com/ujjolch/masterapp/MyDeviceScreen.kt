@@ -1,4 +1,5 @@
 package com.ujjolch.masterapp
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +34,7 @@ fun MyDeviceScreen(onNavBackClicked:()->Unit,
                    userDetailsViewModel: UserDetailsViewModel = viewModel()
 ) {
     val devices by userDetailsViewModel.devices.observeAsState()
+    val context = LocalContext.current
     LaunchedEffect(true) {
         delay(1000)
         userDetailsViewModel.getDeviceList()
@@ -46,7 +49,14 @@ fun MyDeviceScreen(onNavBackClicked:()->Unit,
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onAddDeviceClicked() }) {
+                    IconButton(onClick = {
+                        if(hasBluetoothPermissions(context) && hasLocationPermissions(context)) {
+                            onAddDeviceClicked()
+                        }
+                        else{
+                            ToastManager.showToast(context,"Permissions not granted",Toast.LENGTH_SHORT)
+                        }
+                    }) {
                         Icon(Icons.Default.Add, contentDescription = "Add Device")
                     }
                 },

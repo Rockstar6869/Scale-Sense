@@ -49,7 +49,7 @@ fun ForgetPasswordScreen(onNavigateBack:()->Unit,authViewModel: AuthViewModel= v
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { androidx.compose.material.Text(text = "Foget Password") },
+                title = { androidx.compose.material.Text(text = "Forget Password") },
                 navigationIcon = {
                     IconButton(onClick = { onNavigateBack()}) {
                         Icon(

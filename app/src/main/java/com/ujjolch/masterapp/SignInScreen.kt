@@ -17,12 +17,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -47,6 +52,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.masterapp.R
@@ -108,6 +114,7 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
                  onNavigateToPrivacyPolicy:()->Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     val result by authViewModel.authResult.observeAsState()
@@ -212,22 +219,31 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
             )
             HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
             Spacer(modifier = Modifier.height(8.dp))
-            TransparentTextField(
+            TransparentTextFieldForPassword(
                 value = password,
                 onValueChange = { password = it },
-                label = "Password",
-                visualTransformation = PasswordVisualTransformation()
+                label = "Password"
             )
             HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
+                Spacer(modifier = Modifier.height(8.dp))
+                TransparentTextFieldForPassword(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    label = "Confirm Password"
+                )
+                HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
             Spacer(modifier = Modifier.height(16.dp))
                 }
-        Column(Modifier.fillMaxWidth().
-        align(Alignment.BottomCenter)) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth().
-                padding(bottom = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             ) {
                 Checkbox(
                     checked = Agreed,
@@ -253,13 +269,18 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
             Button(
                 enabled = Agreed,
                 onClick = {
-                    if (email.isNotBlank() && password.isNotBlank() && firstName.isNotBlank() && lastName.isNotBlank()){
-                        authViewModel.signUp(email, password, firstName, lastName)
-                    signinclick = true
-                    email = ""
-                    password = ""
-                    firstName = ""
-                    lastName = ""
+                    if (email.isNotBlank() && password.isNotBlank() && firstName.isNotBlank() && lastName.isNotBlank() && confirmPassword.isNotBlank()){
+                        if(password == confirmPassword) {
+                            authViewModel.signUp(email, password, firstName, lastName)
+                            signinclick = true
+                            email = ""
+                            password = ""
+                            firstName = ""
+                            lastName = ""
+                        }
+                        else{
+                            ToastManager.showToast(context,"Password does not match",Toast.LENGTH_SHORT)
+                        }
                 }
                           },
                 modifier = Modifier
@@ -279,9 +300,10 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
             }
             Spacer(modifier = Modifier.height(16.dp))
         Text("Already have an account? Log in.",
-            modifier = Modifier.clickable {
-                OnNavigateToLogIn()
-            }
+            modifier = Modifier
+                .clickable {
+                    OnNavigateToLogIn()
+                }
                 .align(Alignment.CenterHorizontally), color = colorResource(id = homeScreenBlue))
             Spacer(modifier = Modifier.height(16.dp))
             if(loading){
@@ -317,4 +339,53 @@ fun TransparentTextField(
             unfocusedLabelColor = Color.Gray
         )
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TransparentTextFieldForPassword(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isPassword: Boolean = true
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        visualTransformation = if (isPassword && !passwordVisible)
+            PasswordVisualTransformation()
+        else
+            VisualTransformation.None,
+        trailingIcon = {
+            if (isPassword) {
+
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    if (passwordVisible)
+                        Icon(painter = painterResource(id = R.drawable.baseline_visibility_24), contentDescription = "Visible")
+                    else
+                        Icon(painter = painterResource(id = R.drawable.baseline_visibility_off_24), contentDescription = "Visible off")
+                }
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth(),
+        singleLine = true,
+        shape = RoundedCornerShape(8.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            cursorColor = Color.Black,
+            focusedLabelColor = Color.Gray,
+            unfocusedLabelColor = Color.Gray
+        )
+    )
+}
+@Preview(showBackground = true)
+@Composable
+fun TextFieldPreview() {
+    TransparentTextFieldForPassword(value = "dfbdgd", onValueChange = {}, label = "Password")
 }
