@@ -17,7 +17,9 @@ fun MonthWeightConverter(histList: List<hist>): List<co.yml.charts.common.model.
     val pointsList = mutableListOf<co.yml.charts.common.model.Point>()
 
     groupedByMonth.entries.forEachIndexed { index, entry ->
-        val averageWeight = entry.value.map { it.weight }.average()
+        val averageWeight = entry.value.map {
+            it.weight
+        }.average()
         pointsList.add(
             co.yml.charts.common.model.Point(
                 x = index.toFloat(),

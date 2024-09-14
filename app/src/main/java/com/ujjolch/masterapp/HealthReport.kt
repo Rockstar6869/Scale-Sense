@@ -1,5 +1,6 @@
 package com.ujjolch.masterapp
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import co.yml.charts.common.extensions.isNotNull
+import kotlinx.coroutines.delay
 
 @Composable
 fun HealthReportScreen(onBackClick: () -> Unit,
@@ -58,8 +60,20 @@ fun HealthReportScreen(onBackClick: () -> Unit,
     var userUnitLastWeight by remember {
         mutableStateOf("")
     }
+    var userUnitLastWeight2 by remember {
+        mutableStateOf("")
+    }
     var isComparableHistAvailable by remember {
         mutableStateOf(false)
+    }
+    var isImpedanceZero by remember { mutableStateOf(false) }
+    LaunchedEffect(lastImpedance) {
+        if(lastImpedance == 0){
+            isImpedanceZero = true
+        }
+        else{
+            isImpedanceZero = false
+        }
     }
     LaunchedEffect(userUnits,lastWeight) {
         if(userUnits.isNotNull()){
@@ -72,6 +86,19 @@ fun HealthReportScreen(onBackClick: () -> Unit,
         }
         else{  //When user has not selected any Unit
             userUnitLastWeight = "$lastWeight Kgs"
+        }
+    }
+    LaunchedEffect(userUnitLastWeight) {
+        if(userUnits.isNotNull()){
+            if(userUnits!!.weightunit == "kg") {
+                userUnitLastWeight2 = userUnitLastWeight.dropLast(1)
+            }
+            else if(userUnits!!.weightunit == "lb"){
+                userUnitLastWeight2 = userUnitLastWeight
+            }
+        }
+        else{
+            userUnitLastWeight2 = userUnitLastWeight.dropLast(1)
         }
     }
 
@@ -163,6 +190,8 @@ fun HealthReportScreen(onBackClick: () -> Unit,
         userDetailsViewModel.gethistlist()
     }
 
+
+
         Scaffold(
             backgroundColor = colorResource(id = homeScreenWhite),
             topBar = {
@@ -212,12 +241,12 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                         BodyInfoBox(
                             bodyAge = (age!!).toString(),
                             bodyScore = "0",
-                            bodyWeight = "$lastWeight",
-                            bodyFat = bodyFatPercent.toString(),
+                            bodyWeight = "$userUnitLastWeight2",
+                            bodyFat = if(!isImpedanceZero) bodyFatPercent.toString() else "0.0",
                             prevDate = secondLastWeightDate,
                             wdiff = "${(lastWeight-secondLastWeight).format(2).toDouble()}",
                             BMIdiff = "${(BMI-secondLastBMI).format(2).toDouble()}",
-                            BFTdiff = "${(bodyFatPercent-secondLastBodyFatPercent).format(2).toDouble()}",
+                            BFTdiff = if(!isImpedanceZero) "${(bodyFatPercent-secondLastBodyFatPercent).format(2).toDouble()}" else "0.0",
                             isComparableHistAvailable = isComparableHistAvailable
                         )
                         Column (
@@ -315,19 +344,21 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.BodyWaterP,
-                                    value = "$bodyWaterPercent%",
+                                    value = if(!isImpedanceZero) "$bodyWaterPercent%" else "0.0",
                                     Tag = {
-                                        if (bodyWaterPercent <= 50) {
-                                            BlueTag(text = "Low")
+                                        if (!isImpedanceZero){
+                                            if (bodyWaterPercent <= 50) {
+                                                BlueTag(text = "Low")
 
-                                        } else if (bodyWaterPercent > 50 && bodyWaterPercent <= 65) {
-                                            GreenTag(text = "Standard")
-                                        } else {
-                                            OrangeTag(text = "High")
-                                        }
+                                            } else if (bodyWaterPercent > 50 && bodyWaterPercent <= 65) {
+                                                GreenTag(text = "Standard")
+                                            } else {
+                                                OrangeTag(text = "High")
+                                            }
+                                    }
                                     }) {
                                     BodyWaterPercentSlider(
-                                        value = bodyWaterPercent.toFloat(),
+                                        value = if(!isImpedanceZero) bodyWaterPercent.toFloat() else 0f,
                                         onValueChange = {},
                                         blueRange = 35f..50f,
                                         greenRange = 50f..65f,
@@ -347,21 +378,23 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.BodyFatP,
-                                    value = "$bodyFatPercent%",
+                                    value = if(!isImpedanceZero) "$bodyFatPercent%" else "0.0",
                                     Tag = {
-                                        if (bodyFatPercent <= 6) {
-                                            BlueTag(text = "Low")
-                                        } else if (bodyFatPercent > 6 && bodyFatPercent <= 22) {
-                                            GreenTag(text = "Standard")
-                                        } else if (bodyFatPercent > 22 && bodyFatPercent <= 27) {
-                                            OrangeTag(text = "High")
+                                        if (!isImpedanceZero){
+                                            if (bodyFatPercent <= 6) {
+                                                BlueTag(text = "Low")
+                                            } else if (bodyFatPercent > 6 && bodyFatPercent <= 22) {
+                                                GreenTag(text = "Standard")
+                                            } else if (bodyFatPercent > 22 && bodyFatPercent <= 27) {
+                                                OrangeTag(text = "High")
 
-                                        } else {
-                                            RedTag(text = "Over")
-                                        }
+                                            } else {
+                                                RedTag(text = "Over")
+                                            }
+                                    }
                                     }) {
                                     BodyFatPercentSlider(
-                                        value = bodyFatPercent.toFloat(),
+                                        value = if(!isImpedanceZero) bodyFatPercent.toFloat() else 0f,
                                         onValueChange = {},
                                         blueRange = 0f..6f,
                                         greenRange = 6f..22f,
@@ -385,19 +418,23 @@ fun HealthReportScreen(onBackClick: () -> Unit,
 
                                 ExpandableRow(
                                     index = R.string.LBMP,
-                                    value = "$LeanBodyMassPercent%",
+                                    value = if(!isImpedanceZero) "$LeanBodyMassPercent%" else "0.0",
                                     Tag = {
-                                        if (LeanBodyMassPercent < 68) {
-                                            BlueTag(text = "Low")
-                                        } else if (LeanBodyMassPercent >= 68 && LeanBodyMassPercent <= 90) {
-                                            GreenTag(text = "Standard")
-                                        } else {
-                                            OrangeTag(text = "High")
-                                        }
+                                        if (!isImpedanceZero){
+                                            if (LeanBodyMassPercent < 68) {
+                                                BlueTag(text = "Low")
+                                            } else if (LeanBodyMassPercent >= 68 && LeanBodyMassPercent <= 90) {
+                                                GreenTag(text = "Standard")
+                                            } else {
+                                                OrangeTag(text = "High")
+                                            }
+                                    }
                                     }
                                 ) {
                                     LeanBodyMassPercentSlider(
-                                        value = if (LeanBodyMassPercent < 100f) LeanBodyMassPercent.toFloat() else 112f,
+                                        value = if(!isImpedanceZero) {
+                                            if (LeanBodyMassPercent < 100f) LeanBodyMassPercent.toFloat() else 112f
+                                        } else 0f,
                                         onValueChange = {},
                                         blueRange = 46f..68f,
                                         greenRange = 68f..90f,
@@ -419,18 +456,20 @@ fun HealthReportScreen(onBackClick: () -> Unit,
 
 
                                 ExpandableRow(index = R.string.BoneP,
-                                    value = "$BoneWeightPercent%",
+                                    value = if(!isImpedanceZero) "$BoneWeightPercent%" else "0.0",
                                     Tag = {
-                                        if (BoneWeightPercent <= 10) {
-                                            BlueTag(text = "Low")
-                                        } else if (BoneWeightPercent <= 15) {
-                                            GreenTag(text = "Standard")
-                                        } else if (BoneWeightPercent > 15) {
-                                            DarkGreenTag(text = "Excellent")
-                                        }
+                                        if (!isImpedanceZero){
+                                            if (BoneWeightPercent <= 10) {
+                                                BlueTag(text = "Low")
+                                            } else if (BoneWeightPercent <= 15) {
+                                                GreenTag(text = "Standard")
+                                            } else if (BoneWeightPercent > 15) {
+                                                DarkGreenTag(text = "Excellent")
+                                            }
+                                    }
                                     }) {
                                     BonePercentSlider(
-                                        value = BoneWeightPercent.toFloat(),
+                                        value = if(!isImpedanceZero)  BoneWeightPercent.toFloat() else 0f,
                                         onValueChange = {},
                                         blueRange = 5f..10f,
                                         greenRange = 10f..15f,
@@ -450,18 +489,20 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.ProtienP,
-                                    value = "$ProtienPercent%",
+                                    value = if(!isImpedanceZero) "$ProtienPercent%" else "0.0",
                                     Tag = {
-                                        if (ProtienPercent <= 15.9) {
-                                            BlueTag(text = "Low")
-                                        } else if (ProtienPercent >= 16 && ProtienPercent <= 20.1) {
-                                            GreenTag(text = "Standard")
-                                        } else {
-                                            OrangeTag(text = "High")
-                                        }
+                                        if (!isImpedanceZero){
+                                            if (ProtienPercent <= 15.9) {
+                                                BlueTag(text = "Low")
+                                            } else if (ProtienPercent >= 16 && ProtienPercent <= 20.1) {
+                                                GreenTag(text = "Standard")
+                                            } else {
+                                                OrangeTag(text = "High")
+                                            }
+                                    }
                                     }) {
                                     ProteinPercentSlider(
-                                        value = ProtienPercent.toFloat(),
+                                        value = if(!isImpedanceZero) ProtienPercent.toFloat() else 0f,
                                         onValueChange = {},
                                         blueRange = 11.9f..16f,
                                         greenRange = 16f..20.1f,
@@ -481,18 +522,20 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.MusscleP,
-                                    value = "$MusclePercent%",
+                                    value = if(!isImpedanceZero) "$MusclePercent%" else "0.0",
                                     Tag = {
-                                        if (MusclePercent < 73) {
-                                            BlueTag(text = "Low")
-                                        } else if (MusclePercent < 81) {
-                                            GreenTag(text = "Standard")
-                                        } else if (MusclePercent >= 81) {
-                                            DarkGreenTag(text = "Excellent")
-                                        }
+                                        if (!isImpedanceZero){
+                                            if (MusclePercent < 73) {
+                                                BlueTag(text = "Low")
+                                            } else if (MusclePercent < 81) {
+                                                GreenTag(text = "Standard")
+                                            } else if (MusclePercent >= 81) {
+                                                DarkGreenTag(text = "Excellent")
+                                            }
+                                    }
                                     }) {
                                     MusclePercentSlider(
-                                        value = MusclePercent.toFloat(),
+                                        value = if(!isImpedanceZero) MusclePercent.toFloat() else 0f,
                                         onValueChange = {},
                                         blueRange = 65f..73f,
                                         greenRange = 73f..81f,
@@ -525,19 +568,21 @@ fun HealthReportScreen(onBackClick: () -> Unit,
 //                                )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.VFI,
-                                    value = "$VFI",
+                                    value = if(!isImpedanceZero) "$VFI" else "0.0",
                                     Tag = {
-                                        if (VFI < 10) {
-                                            GreenTag(text = "Standard")
+                                        if (!isImpedanceZero){
+                                            if (VFI < 10) {
+                                                GreenTag(text = "Standard")
 
-                                        } else if (VFI <= 17) {
-                                            OrangeTag(text = "High")
-                                        } else if (VFI > 17) {
-                                            RedTag(text = "Over")
-                                        }
+                                            } else if (VFI <= 17) {
+                                                OrangeTag(text = "High")
+                                            } else if (VFI > 17) {
+                                                RedTag(text = "Over")
+                                            }
+                                    }
                                     }) {
                                     VisceralFatIndexSlider(
-                                        value = VFI.toFloat(),
+                                        value = if(!isImpedanceZero) VFI.toFloat() else 0f,
                                         onValueChange = {},
                                         greenRange = 0f..10f,
                                         orangeRange = 10f..17f,
@@ -558,8 +603,9 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.subcutFat,
-                                    value = "$SubcutaneousFat Kg",
+                                    value =  if(!isImpedanceZero) "$SubcutaneousFat Kg" else "0.0",
                                     Tag = {
+                                        if(!isImpedanceZero){
                                         if (SubcutaneousFat < 5) {
                                             BlueTag(text = "Low")
                                         } else if (SubcutaneousFat <= 10.5) {
@@ -567,10 +613,11 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                         } else {
                                             OrangeTag(text = "High")
                                         }
+                                    }
 
                                     }) {
                                     SubcutaneousFatSlider(
-                                        value = SubcutaneousFat.toFloat(),
+                                        value = if(!isImpedanceZero) SubcutaneousFat.toFloat() else 0f,
                                         onValueChange = {},
                                         blueRange = 0f..5f,
                                         greenRange = 5f..10.5f,
@@ -603,8 +650,9 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.BMR,
-                                    value = "$BMR kcal",
+                                    value = if(!isImpedanceZero)  "$BMR kcal" else "0.0",
                                     Tag = {
+                                        if(!isImpedanceZero){
                                         if(BMR<=1450){
                                             BlueTag(text = "Low")
                                         }
@@ -616,9 +664,10 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                             DarkGreenTag(text = "Excellent")
 
                                         }
+                                        }
                                     }) {
                                     BMRSlider(
-                                        value = BMR.toFloat(),
+                                        value = if(!isImpedanceZero)  BMR.toFloat() else 0f,
                                         onValueChange = {},
                                         blueRange = 1250f..1450f,
                                         greenRange = 1450f..1650f,
@@ -639,18 +688,18 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRowForAMR(index = R.string.AMR,
-                                    value = "$AMR Kcal",
+                                    value =  if(!isImpedanceZero) "$AMR Kcal" else "0.0",
                                     Tag = { },
                                     onSelectedOptionChange = {
-                                        if (it == "(Sedentary)") {
+                                        if (it == 0) {
                                             selectedOptionForAMR = "e"
-                                        } else if (it == "(Lightly active)") {
+                                        } else if (it == 1) {
                                             selectedOptionForAMR = "la"
-                                        } else if (it == "(Moderately active)") {
+                                        } else if (it == 2) {
                                             selectedOptionForAMR = "ma"
-                                        } else if (it == "(Active)") {
+                                        } else if (it == 3) {
                                             selectedOptionForAMR = "a"
-                                        } else if (it == "(Extremely active)") {
+                                        } else if (it == 4) {
                                             selectedOptionForAMR = "ea"
                                         }
                                     },
@@ -828,6 +877,7 @@ fun BodyInfoBox(
     val distancing = if(screenWidth<600.dp) 32.dp else 52.dp //distance after compare with
     val distancing2 = if(screenWidth<600.dp) 0.dp else 30.dp
     val lowerboxheight = if(screenWidth<600.dp) 120.dp else 170.dp
+    val fontsize1 = if(screenWidth<600.dp) (screenWidth.value/15.72).sp else 25.sp
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -842,7 +892,8 @@ fun BodyInfoBox(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth(0.3f)) {
                 Text(
                     text = stringResource(id = R.string.BodyAge),
                     maxLines = 1,
@@ -853,11 +904,12 @@ fun BodyInfoBox(
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = bodyAge,
-                    fontSize = 25.sp,
+                    fontSize = fontsize1,
                     color = Color.White
                 )
             }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth(0.5f)) {
 //                BodyScoreCircularProgressIndicator(
 //                    progress = bodyScore.toFloat(),
 //                    modifier = Modifier.size(80.dp)
@@ -889,8 +941,10 @@ fun BodyInfoBox(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "$bodyWeight Kg",
-                    fontSize = 25.sp,
+                    text = "$bodyWeight",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontSize = fontsize1,
                     color = Color.White
                 )
 
@@ -906,7 +960,7 @@ fun BodyInfoBox(
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "$bodyFat%",
-                    fontSize = 25.sp,
+                    fontSize = fontsize1,
                     color = Color.White
                 )
             }
@@ -1040,16 +1094,33 @@ fun NonExpandableRow(index: String, value: String) {
 fun ExpandableRowForAMR(index: Int, value: String,
                   Tag:@Composable () -> Unit,
                   expandedContent: @Composable () -> Unit,
-                        onSelectedOptionChange:(selectedOption:String)->Unit) {
+                        onSelectedOptionChange:(selectedOption:Int)->Unit) {
     var isExpanded by remember { mutableStateOf(false) }
     var isMenuExpanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("(Sedentary)") }
+    var selectedOption by remember { mutableStateOf(0) }
+    var selectedOptionString by remember { mutableStateOf(0) }
     var selectedOnce by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
         targetValue = if(isExpanded) 90f else 0f,
         animationSpec = tween(durationMillis = 200)
     )
-
+    LaunchedEffect(selectedOption) {
+        if(selectedOption == 0){
+            selectedOptionString =  R.string.AMRP11
+        }
+        else if(selectedOption == 1){
+            selectedOptionString = R.string.AMRP2
+        }
+        else if(selectedOption == 2){
+            selectedOptionString = R.string.AMRP3
+        }
+        else if(selectedOption == 3){
+            selectedOptionString = R.string.AMRP4
+        }
+        else if(selectedOption == 4){
+            selectedOptionString = R.string.AMRP5
+        }
+    }
     Row(
         Modifier
             .fillMaxWidth()
@@ -1070,72 +1141,96 @@ fun ExpandableRowForAMR(index: Int, value: String,
                     text = stringResource(id = index),
 //                    fontWeight = FontWeight.ExtraBold
                 )
-                Text(text = if(!selectedOnce)"Select your activity level" else selectedOption,
-                    modifier = Modifier
-                        .clickable { isMenuExpanded = !isMenuExpanded }
-                        .padding(start = 8.dp),
+                Row (Modifier.fillMaxWidth(0.5f)) {
+                    Text(text = if (!selectedOnce) stringResource(id = R.string.AMRP1) else stringResource(
+                        id = selectedOptionString
+                    ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .clickable { isMenuExpanded = !isMenuExpanded }
+                            .padding(start = 8.dp),
                         fontSize = 12.sp)
-                Icon(imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "drop down",
-                    modifier = Modifier.size(15.dp))
+
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "drop down",
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
                 DropdownMenu(
                     expanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false }
                 ) {
                     DropdownMenuItem(onClick = {
-                        selectedOption = "(Sedentary)"
+                        selectedOption = 0
                         onSelectedOptionChange(selectedOption)
                         selectedOnce = true
                         isMenuExpanded = false
                     },
                         modifier = Modifier.width(300.dp)) {
-                        Text("Sedentary (little or no exercise)",
-                            color = if(selectedOption == "(Sedentary)") colorResource(id = R.color.Home_Screen_Blue)
+                        Text(
+                            stringResource(id = R.string.AMRP6),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = if(selectedOption == 0) colorResource(id = R.color.Home_Screen_Blue)
                                     else Color.Black)
                     }
                     DropdownMenuItem(onClick = {
-                        selectedOption = "(Lightly active)"
+                        selectedOption = 1
                         onSelectedOptionChange(selectedOption)
                         selectedOnce = true
                         isMenuExpanded = false
                     },
                         modifier = Modifier.width(300.dp)) {
-                        Text("Lightly active (1–3 days/week)",
-                            color = if(selectedOption == "(Lightly active)") colorResource(id = R.color.Home_Screen_Blue)
+                        Text(
+                            stringResource(id = R.string.AMRP7),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = if(selectedOption == 1) colorResource(id = R.color.Home_Screen_Blue)
                             else Color.Black)
                     }
                     DropdownMenuItem(onClick = {
-                        selectedOption = "(Moderately active)"
+                        selectedOption = 2
                         onSelectedOptionChange(selectedOption)
                         selectedOnce = true
                         isMenuExpanded = false
                     },
                         modifier = Modifier.width(300.dp)) {
-                        Text("Moderately active (3–5 days/week)",
-                            color = if(selectedOption == "(Moderately active)") colorResource(id = R.color.Home_Screen_Blue)
+                        Text(
+                            stringResource(id = R.string.AMRP8),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = if(selectedOption == 2) colorResource(id = R.color.Home_Screen_Blue)
                             else Color.Black)
                     }
                     DropdownMenuItem(onClick = {
-                        selectedOption = "(Active)"
+                        selectedOption = 3
                         onSelectedOptionChange(selectedOption)
                         selectedOnce = true
                         isMenuExpanded = false
                     },
                         modifier = Modifier.width(300.dp)) {
-                        Text("Active (5–6 days/week)",
-                            color = if(selectedOption == "(Active)") colorResource(id = R.color.Home_Screen_Blue)
+                        Text(
+                            stringResource(id = R.string.AMRP9),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = if(selectedOption == 3) colorResource(id = R.color.Home_Screen_Blue)
                             else Color.Black)
                     }
                     DropdownMenuItem(onClick = {
-                        selectedOption = "(Extremely active)"
+                        selectedOption = 4
                         onSelectedOptionChange(selectedOption)
                         selectedOnce = true
                         isMenuExpanded = false
                     },
                         modifier = Modifier.width(300.dp)
                     ) {
-                        Text("Extremely active (6–7 days/week)",
-                            color = if(selectedOption == "(Extremely active)") colorResource(id = R.color.Home_Screen_Blue)
+                        Text(
+                            stringResource(id = R.string.AMRP10),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = if(selectedOption == 4) colorResource(id = R.color.Home_Screen_Blue)
                             else Color.Black)
                     }
                 }

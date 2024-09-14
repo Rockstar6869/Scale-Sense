@@ -155,7 +155,6 @@ suspend fun checkIfFirstTimeUser(): Result<Boolean> {
             } else {
                 // First time sign-in
                 Log.d("SignInCheck", "User is signing in for the first time.")
-                createUserRecord() // Create user record asynchronously
                 Result.Success(true)
             }
         } else {

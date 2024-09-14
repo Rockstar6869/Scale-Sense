@@ -163,11 +163,17 @@ class UserRepository( private val auth:FirebaseAuth,
         val lastName = user?.displayName?.split(" ")?.lastOrNull() ?: ""
         val email = user?.email ?: ""
         val usertosave = User(firstName,lastName,email.lowercase())
+        val userEmailDocRef =  FirebaseFirestore.getInstance().collection("users").document(email).get().await()
+        val userEmailAlreadyExists = userEmailDocRef.exists()
+        Log.d("FB125","$userEmailAlreadyExists")
         when(val result = checkIfFirstTimeUser()){
             is Result.Success ->{
                 if(result.data == true){
                     androidx.media3.common.util.Log.d("FB125", "working")
+                    createUserRecord() //Create user record of signing in to google at least once
+                    if(!userEmailAlreadyExists){
                     SaveusertoFirestore(usertosave)
+                        }
                 }
                 else{
                     androidx.media3.common.util.Log.d("FB125", "not working")
@@ -186,5 +192,50 @@ class UserRepository( private val auth:FirebaseAuth,
         androidx.media3.common.util.Log.d("FB125", "$e")
         Result.Error(e)
     }
+//suspend fun firebaseAuthWithGoogle(idToken: String): Result<Boolean> = try {
+//    val credential = GoogleAuthProvider.getCredential(idToken, null)
+//    val authResult = auth.signInWithCredential(credential).await()
+//
+//    // Get user details from FirebaseUser
+//    val user = authResult.user
+//    val firstName = user?.displayName?.split(" ")?.firstOrNull() ?: ""
+//    val lastName = user?.displayName?.split(" ")?.lastOrNull() ?: ""
+//    val email = user?.email?.lowercase() ?: ""
+//    val userToSave = User(firstName, lastName, email)
+//
+//    // Check if the email is already associated with any sign-in method
+//    val signInMethods = auth.fetchSignInMethodsForEmail(email).await()
+//
+//    if (signInMethods.signInMethods.isNullOrEmpty()) {
+//        // No sign-in methods associated with this email, proceed to save to Firestore
+//        androidx.media3.common.util.Log.d("FB125", "No sign-in methods found, saving to Firestore")
+//
+//        // Check if it's the first time the user signs in with Google
+//        when (val result = checkIfFirstTimeUser()) {
+//            is Result.Success -> {
+//                if (result.data == true) {
+//                    createUserRecord()
+//                    SaveusertoFirestore(userToSave)
+//                    androidx.media3.common.util.Log.d("FB125", "First-time user, saved to Firestore")
+//                } else {
+//                    androidx.media3.common.util.Log.d("FB125", "Not a first-time user")
+//                }
+//            }
+//            is Result.Error -> {
+//                androidx.media3.common.util.Log.d("FB125", "Error checking first-time user: ${result.exception}")
+//            }
+//        }
+//    } else {
+//        // Email is already associated with a sign-in method
+//        androidx.media3.common.util.Log.d("FB125", "Email is already associated with a sign-in method")
+//    }
+//
+//    Result.Success(true)
+//} catch (e: Exception) {
+//    androidx.media3.common.util.Log.d("FB125", "Error: $e")
+//    Result.Error(e)
+//}
+//
+//
 }
 

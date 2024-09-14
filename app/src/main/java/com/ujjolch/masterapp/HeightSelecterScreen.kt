@@ -94,6 +94,9 @@ fun HeightSelectionScreen(sharedViewModel: SharedViewModel,
             initialvalue = "$ft'$inch\""
         }
     }
+    LaunchedEffect(Unit) {
+        userDetailsViewModel.loadcurrentuser()
+    }
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(bottom = 80.dp)){
@@ -169,7 +172,7 @@ fun HeightSelectionScreen(sharedViewModel: SharedViewModel,
                 contentColor = Color.White
             )
         ) {
-            Text(text = "Save",
+            Text(text = stringResource(id = R.string.Save),
                 color = Color.White)
         }
 

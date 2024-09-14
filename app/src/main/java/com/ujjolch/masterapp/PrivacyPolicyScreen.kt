@@ -16,9 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun PrivacyPolicyScreen(onNavigateBack:()->Unit) {
+fun PrivacyPolicyScreen(logInSharedViewModel: LogInSharedViewModel = viewModel(),
+                        signInSharedViewModel: SignInSharedViewModel = viewModel(),
+    onNavigateBack:()->Unit) {
 
     Scaffold(
         topBar = {

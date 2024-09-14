@@ -11,10 +11,10 @@ android {
 
     defaultConfig {
         applicationId = "com.ujjolch.masterapp"
-        minSdk = 26
+        minSdk = 31
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 4
+        versionName = "4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -47,6 +47,11 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    bundle {
+        language {
+            enableSplit = false // Include all languages in the AAB
         }
     }
 }

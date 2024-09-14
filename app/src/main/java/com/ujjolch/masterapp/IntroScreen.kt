@@ -31,7 +31,7 @@ fun IntroScreen() {
             modifier = Modifier.padding(16.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.jipvi_logo1), // Replace with your actual logo resource
+                painter = painterResource(id = R.drawable.health_bliss_logo_final_1), // Replace with your actual logo resource
                 contentDescription = "Company Logo",
                 modifier = Modifier.size(400.dp), // Adjust the size as needed
                 contentScale = ContentScale.Fit

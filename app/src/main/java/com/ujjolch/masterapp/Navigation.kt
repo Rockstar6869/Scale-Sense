@@ -25,7 +25,9 @@ import kotlinx.coroutines.delay
 fun Navigation(navController: NavController,
                authViewModel: AuthViewModel,
                bluetoothViewModel: BleScanViewModel = viewModel(),
-               userDetailsViewModel: UserDetailsViewModel = viewModel()
+               userDetailsViewModel: UserDetailsViewModel = viewModel(),
+               logInSharedViewModel: LogInSharedViewModel = viewModel(),
+               signInSharedViewModel: SignInSharedViewModel = viewModel()
 ){
     val currentUser by userDetailsViewModel.currentUser.observeAsState()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
@@ -113,6 +115,7 @@ fun Navigation(navController: NavController,
 
             }
             SignUpScreen(authViewModel = authViewModel,
+                signInSharedViewModel = signInSharedViewModel,
                 OnNavigateToLogIn = {
                     navController.navigate(Screen.LogInScreen.route)
                 },
@@ -124,6 +127,7 @@ fun Navigation(navController: NavController,
 
             }
             LoginScreen(authViewModel = authViewModel,
+                logInSharedViewModel = logInSharedViewModel,
                 onNavigateTosignin = {
                     navController.navigate(Screen.SignInScreen.route)
                 },
@@ -181,7 +185,7 @@ fun Navigation(navController: NavController,
             // Check the previous destination
             val previousDestination: NavDestination? =
                 navController.previousBackStackEntry?.destination
-            PrivacyPolicyScreen {
+            PrivacyPolicyScreen(logInSharedViewModel = logInSharedViewModel,signInSharedViewModel = signInSharedViewModel) {
                 if (previousDestination.isNotNull()){
                     if (previousDestination!!.route == Screen.LogInScreen.route) {
                         navController.navigate(Screen.LogInScreen.route)

@@ -270,6 +270,7 @@ fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()) {
         ) {
             val configuration = LocalConfiguration.current
             val screenHeight = configuration.screenHeightDp.dp
+            val screenWidth = configuration.screenWidthDp.dp
             val dynamicHeight = (screenHeight.value / 8.77).dp
 
             listOfTabs.forEachIndexed { index, tab ->
@@ -279,7 +280,7 @@ fun HistoryScreen(userDetailsViewModel: UserDetailsViewModel = viewModel()) {
                     Tab(
                         modifier = Modifier
                             .height(dynamicHeight)
-                            .width(120.dp)
+                            .width(if(screenWidth.value<600)120.dp else 200.dp)
                             .background(
                                 if (isSelected) Color.White else colorResource(id = tabUnSelectedWhite)
                             ),

@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
@@ -99,6 +100,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun LoginScreen(onNavigateTosignin:()->Unit,
                 authViewModel: AuthViewModel,
+                logInSharedViewModel: LogInSharedViewModel,
                 onGoogleFirstTimeLogIn:()-> Unit,
                 onVerifiedLogInSuccess:() -> Unit,
                 onUnverifiedLogInSuccess:()->Unit,
@@ -112,6 +114,13 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
     var loading by remember { mutableStateOf(false) }
     var loadingforgoogle by remember { mutableStateOf(false) }
     var resultCodeForGoogle by remember { mutableStateOf(0) }
+
+    val cachedEmail by logInSharedViewModel.LogInEmail.observeAsState()
+    val cachedPassword by logInSharedViewModel.Password.observeAsState()
+
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidthDp = configuration.screenWidthDp.dp
 
     var Agreed by remember { mutableStateOf(false) }
 
@@ -254,6 +263,17 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
         }
 
     }
+    LaunchedEffect(cachedEmail,cachedPassword) {
+
+        if(cachedEmail.isNotNull() && cachedEmail!!.isNotBlank()){
+            email = cachedEmail!!
+        }
+        if(cachedPassword.isNotNull() && cachedPassword!!.isNotBlank()){
+            password = cachedPassword!!
+        }
+    }
+
+    val DynamicImageTextPadding = if(screenHeight>700.dp) (screenHeight.value/21.9).dp else 0.dp
 
 
     Box(
@@ -265,22 +285,23 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
                     keyboardController?.hide()
                 })
             },
-        contentAlignment = Alignment.Center
+//        contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .padding(top =if(screenHeight.value<700) 25.dp else 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.jipvi_logo1),
+                painter = painterResource(id = R.drawable.health_bliss_logo_final_1),
                 contentDescription = "Company Logo",
-                modifier = Modifier.size(250.dp),
+                modifier = Modifier.size(if(screenHeight>700.dp) 220.dp else 200.dp),
                 contentScale = ContentScale.Fit
             )
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(DynamicImageTextPadding))
             TransparentTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -300,6 +321,7 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
                 Text(text = "Forget Password?",
                     color = colorResource(id = homeScreenBlue),
                     modifier = Modifier.clickable {
+                        logInSharedViewModel.set(email,password)
                         onNavigateToForgetPassword()
                     })
             }
@@ -325,6 +347,7 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
                     text = "Privacy Policy",
                     color = colorResource(id = homeScreenBlue),
                     modifier = Modifier.clickable {
+                        logInSharedViewModel.set(email,password)
                         onNavigateToPrivacyPolicy()
                     }
                 )
@@ -335,6 +358,7 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
                     if(email.isNotBlank() && password.isNotBlank()) {
                         authViewModel.LogIn(email, password)
                         loginclick = true
+                        logInSharedViewModel.delete()
 //                    when(result){
 //                            is Result.Success->{
 //                                onVerifiedLogInSuccess()
@@ -355,7 +379,7 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
                     contentColor = Color.White)
             ) {
                 Text(
-                    text = "Log In",
+                    text = "Sign In",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -363,28 +387,45 @@ fun LoginScreen(onNavigateTosignin:()->Unit,
             Spacer(modifier = Modifier.height(16.dp))
         Text("Don't have an account? Sign up.",
             color = colorResource(id = homeScreenBlue),
-            modifier = Modifier.clickable { onNavigateTosignin() }
+            modifier = Modifier.clickable {
+                logInSharedViewModel.delete()
+                onNavigateTosignin()
+            }
         )
             Spacer(modifier = Modifier.height(16.dp))
             if(loading){
                 LinearProgressIndicator()
             }
-//            Text(text = "$authResultforgoogle")
-    }
-        Row (
-            Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 10.dp)){
-            IconButton(onClick = {
-                val signinIntent = googleSignInManager.googleSignInClient.signInIntent
+            Row (
+                Modifier
+                    .padding(bottom = 10.dp)){
+               GoogleSignInButton {
+                   val signinIntent = googleSignInManager.googleSignInClient.signInIntent
                 launcher.launch(signinIntent)
                 loginclickforgoogle = true
-            }) {
-                Image(painter = painterResource(id = R.drawable.google_icon),
-                    contentDescription = "google sign in")
-            }
+                logInSharedViewModel.delete()
+               }
 
-        }
+            }
+//            Text(text = "$authResultforgoogle")
+    }
+//        Row (
+//            Modifier
+//                .padding(bottom = 10.dp)){
+//            IconButton(onClick = {
+//                val signinIntent = googleSignInManager.googleSignInClient.signInIntent
+//                launcher.launch(signinIntent)
+//                loginclickforgoogle = true
+//                logInSharedViewModel.delete()
+//            }) {
+//
+//                    Image(
+//                        painter = painterResource(id = R.drawable.google_icon),
+//                        contentDescription = "google sign in"
+//                    )
+//            }
+//
+//        }
 }
 }
 

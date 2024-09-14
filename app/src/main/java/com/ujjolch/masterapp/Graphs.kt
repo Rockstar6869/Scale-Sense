@@ -61,7 +61,7 @@ fun WeightGraph(userHist: List<hist>,weightUnit:String,selectedTimeRange:Int) {
     else{
         val data = dataPoints.get(0)
         val date = datehist.get(0)
-        GraphForSingleValue(label = date, value = (data.y).toDouble(), unit = "Kg")
+        GraphForSingleValue(label = date, value = (data.y).toDouble(), unit = weightUnit)
     }
 
 
@@ -98,7 +98,7 @@ fun BMIGraph(userHist: List<hist>,HeightInCM:Double,selectedTimeRange:Int){
     else{
         val data = dataPoints.get(0)
         val date = datehist.get(0)
-        GraphForSingleValue(label = date, value =Calculate.BMI(HeightInCM,(data.y).toDouble()) , unit = "")
+        GraphForSingleValue(label = date, value = data.y.toDouble() , unit = "")
     }
 
 }
@@ -118,7 +118,10 @@ fun BodyWaterPercentGraph(userHist:List<hist>,HeightInCM:Double,Age:Int,Gender:S
                         hist.weight
                     ), hist.weight
                 )
-                if (bwp <= 100) {
+                if(hist.impedance==0){
+                    Point(index.toFloat(), 0f)
+                }
+                else if (bwp <= 100) {
                     Point(index.toFloat(), bwp.toFloat())
                 } else {
                     Point(index.toFloat(), 100f)
@@ -174,7 +177,10 @@ fun BodyWaterPercentGraph(userHist:List<hist>,HeightInCM:Double,Age:Int,Gender:S
                         hist.weight
                     ), hist.weight
                 )
-                if (bwp <= 100) {
+                if(hist.impedance==0){
+                    Point(index.toFloat(), 0f)
+                }
+                else if (bwp <= 100) {
                     Point(index.toFloat(), bwp.toFloat())
                 } else {
                     Point(index.toFloat(), 100f)
@@ -239,8 +245,10 @@ fun BodyFatPercentGraph(userHist:List<hist>,HeightInCM:Double,Age:Int,Gender:Str
         if(selectedTimeRange == 0) {
             datapoints = userHist.mapIndexed { index, hist ->
                 val yValue =
+                    if(hist.impedance!=0){
                     Calculate.BodyFatPercentforMale(Age, Calculate.BMI(HeightInCM, hist.weight))
-                        .toFloat()
+                        .toFloat()}
+                    else {0f}
                 Point(index.toFloat(), if (yValue < 0) 0f else yValue)
             }
             datehist =  userHist.map { convert4digYearToNoYear(it.date) }

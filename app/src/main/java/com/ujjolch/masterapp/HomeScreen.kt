@@ -113,6 +113,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
     val userHistory by userDetailsViewModel.userHist.observeAsState()
     var NoComparableHist by remember { mutableStateOf(true) }
     var lastWeight by remember { mutableStateOf(0.0) }
+    var lastImpedance by remember { mutableStateOf(0) }
     var lastWeightDate by remember { mutableStateOf("") }
     var secondLastWeight by remember { mutableStateOf(0.0) }
     var secondLastWeightDate by remember { mutableStateOf("") }
@@ -164,8 +165,11 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
     if(!userHistory.isNullOrEmpty()){
         val datehist = userHistory!!.map { it.date }
         val weighthist = userHistory!!.map { it.weight }
+        val impedancehist = userHistory!!.map { it.impedance }
 
         lastWeight = weighthist.last()
+        lastImpedance = impedancehist.last()
+
         if(userHistory!!.size>1) {
             secondLastWeightDate = datehist[datehist.size - 2]
             secondLastWeight = weighthist[weighthist.size - 2]
@@ -663,14 +667,24 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = if(!NoComparableHist) "${SignAdder((lastBodyFatPercent-secondLastBodyFatPercent).format(2))}%" else "--",
+                                        text = if(!NoComparableHist && (lastImpedance !=0))
+                                            "${
+                                                SignAdder(
+                                                    (lastBodyFatPercent - secondLastBodyFatPercent).format(
+                                                        2
+                                                    )
+                                                )
+                                            }%"
+                                         else "--",
                                         modifier = if(!NoComparableHist) Modifier.padding(start = 18.dp) else Modifier,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 20.sp
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Row (verticalAlignment = Alignment.CenterVertically){
-                                        if(!NoComparableHist) {
+                                        if(!NoComparableHist && lastImpedance!=0) {
                                             if (Increased) androidx.compose.material.Icon(
                                                 painter = painterResource(id = R.drawable.baseline_increase),
                                                 contentDescription = "increased",
@@ -686,7 +700,9 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                         }
                                         Text(
                                             text = stringResource(id = R.string.BodyFatPForHome),
-                                            fontSize = 15.sp
+                                            fontSize = 15.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
                                 }
@@ -714,7 +730,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                     color = colorResource(id = homeScreenBlue),
                                     modifier = Modifier.pointerInput(Unit) {
                                 detectTapGestures(onTap = {
-                                    if(userdata.isNotNull() && (lastWeight!=0.00 || showHealthReport== true) ) {
+                                    if(userdata.isNotNull() && (lastWeight!=0.00 || showHealthReport)) {
                                         onNavigateToHealthReport()
                                     }
                                 })}
@@ -725,7 +741,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                             .padding(end = 8.dp)
                                             .pointerInput(Unit) {
                                                 detectTapGestures(onTap = {
-                                                    if (!userHistory.isNullOrEmpty()) {
+                                                    if (userdata.isNotNull() && (lastWeight != 0.00 || showHealthReport)) {
                                                         onNavigateToHealthReport()
                                                     }
                                                 })
@@ -926,12 +942,12 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                             else{
                                 if(userdata?.gender == "Male") {
                                     Text(
-                                        text = "${
+                                        text = if(lastImpedance!=0)"${
                                             Calculate.BodyFatPercentforMale(
                                                 age ?: 0,
                                                 Calculate.BMI(userdata?.heightincm ?: 0.0, lastWeight)
                                             )
-                                        }%",
+                                        }%" else "0.0",
                                         color = colorResource(id = homeScreenBlue),
                                         modifier = Modifier.padding(vertical = 8.dp),
                                         fontSize = dynamicFontSize
@@ -939,12 +955,12 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                 }
                                 else{
                                     Text(
-                                        text = "${
+                                        text = if(lastImpedance!=0)"${
                                             Calculate.BodyFatPercentforFemale(
                                                 age ?: 0,
                                                 Calculate.BMI(userdata?.heightincm ?: 0.0, lastWeight)
                                             )
-                                        }%",
+                                        }%" else "0.0",
                                         color = colorResource(id = homeScreenBlue),
                                         modifier = Modifier.padding(vertical = 8.dp),
                                         fontSize = dynamicFontSize
@@ -956,24 +972,24 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                         if (userdata.isNotNull()){
                             if (userdata?.gender == "Male") {
                                 Text(
-                                    text = "${
+                                    text = if(impedence!=0)"${
                                         Calculate.BodyFatPercentforMale(
                                             age ?: 0,
                                             Calculate.BMI(userdata?.heightincm ?: 0.0, weightinkgs)
                                         )
-                                    }%",
+                                    }%" else "0.0",
                                     color = colorResource(id = homeScreenBlue),
                                     modifier = Modifier.padding(vertical = 8.dp),
                                     fontSize = dynamicFontSize
                                 )
                             } else {
                                 Text(
-                                    text = "${
+                                    text = if(impedence!=0)"${
                                         Calculate.BodyFatPercentforFemale(
                                             age ?: 0,
                                             Calculate.BMI(userdata?.heightincm ?: 0.0, weight)
                                         )
-                                    }%",
+                                    }%" else "0.0",
                                     color = colorResource(id = homeScreenBlue),
                                     modifier = Modifier.padding(vertical = 8.dp),
                                     fontSize = dynamicFontSize

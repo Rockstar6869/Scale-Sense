@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -205,9 +206,9 @@ fun NewAddDeviceScreen(bleScanViewModel: BleScanViewModel,
                 RadarAnimation(isAnimating = isScanning.value)
                 Spacer(modifier = Modifier.height(8.dp))
                 Column(Modifier.padding(start = 24.dp)) {
-                    Text(text = "1. Install batteries or fully charge the scale.")
-                    Text(text = "2. Gently step on the scale to turn on.")
-                    Text(text = "3. Make sure your phone is close to the scale.")
+                    Text(text = stringResource(id = R.string.AddDevicePrompt16))
+                    Text(text = stringResource(id = R.string.AddDevicePrompt17))
+                    Text(text = stringResource(id = R.string.AddDevicePrompt18))
                 }
                 Spacer(modifier = Modifier.height(22.dp))
                 if (finddevice) {
@@ -267,16 +268,16 @@ fun NewAddDeviceScreen(bleScanViewModel: BleScanViewModel,
                             modifier = Modifier.size(40.dp),
                             contentDescription = "ndf",
                             tint = colorResource(id = R.color.Icon_Tint))
-                    Text(text = "No device found", color = colorResource(id = R.color.Icon_Tint))
+                    Text(text = stringResource(id = R.string.AddDevicePrompt10), color = colorResource(id = R.color.Icon_Tint))
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Column(Modifier.padding(horizontal = 24.dp)) {
-                    Text(text = "⚠️ No device found", fontWeight = FontWeight.Bold)
-                    Text(text = "1. Check whether the scale can be turned on properly: make sure batteries are correctly installed; gently step on the scale to turn it on. If the screen lights up and displays 0.0, it’s turned on successfully.")
-                    Text(text = "2. Check whether the Bluetooth is turned on: the Bluetooth icon will appear on the top of the phone screen if yes.")
-                    Text(text = "3. The distance between the phone and the scale should be within 2 meters without any obstacles.")
-                    Text(text = "4. Exit the APP, then restart the APP.")
-                    Text(text = "5. Reboot your phone.")
+                    Text(text = "⚠️ "+ stringResource(id = R.string.AddDevicePrompt10), fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(id = R.string.AddDevicePrompt11))
+                    Text(text = stringResource(id = R.string.AddDevicePrompt12))
+                    Text(text = stringResource(id = R.string.AddDevicePrompt13))
+                    Text(text = stringResource(id = R.string.AddDevicePrompt14))
+                    Text(text = stringResource(id = R.string.AddDevicePrompt15))
                 }
             }
             Column(
@@ -318,6 +319,9 @@ fun NewAddDeviceScreen(bleScanViewModel: BleScanViewModel,
 @Composable
 fun DeviceFoundRow(deviceName: String, macAddress: String
                    ,onDeviceClick:()->Unit){
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidthDp = configuration.screenWidthDp.dp
     Row (
         Modifier
             .fillMaxWidth()
@@ -336,7 +340,7 @@ fun DeviceFoundRow(deviceName: String, macAddress: String
         }
         Row (Modifier.padding(horizontal = 16.dp)){
         Button(
-            modifier = Modifier.fillMaxWidth(0.7f),
+            modifier = if(screenWidthDp.value<600) Modifier.fillMaxWidth(0.7f) else Modifier.fillMaxWidth(0.3f),
             onClick = { onDeviceClick() }, shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Black,

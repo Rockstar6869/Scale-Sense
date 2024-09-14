@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import co.yml.charts.common.extensions.isNotNull
 
@@ -194,9 +195,12 @@ fun BoxWithAddIcon(onAddUser: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(id = R.string.Add),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center
             )
+
         }
     }
 }

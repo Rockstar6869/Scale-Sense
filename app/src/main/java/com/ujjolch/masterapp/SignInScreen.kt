@@ -55,6 +55,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.yml.charts.common.extensions.isNotNull
 import com.example.masterapp.R
 import kotlinx.coroutines.delay
 
@@ -110,6 +111,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
                  authViewModel: AuthViewModel,
+                 signInSharedViewModel: SignInSharedViewModel,
                  onSignInSuccess:()->Unit,
                  onNavigateToPrivacyPolicy:()->Unit) {
     var email by remember { mutableStateOf("") }
@@ -121,6 +123,12 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
     var signinclick by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
 
+    val cachedfname by signInSharedViewModel.Fname.observeAsState()
+    val cachedLname by signInSharedViewModel.Lname.observeAsState()
+    val cachedemail by signInSharedViewModel._SignInEmail.observeAsState()
+    val cachedpassword by signInSharedViewModel.Password.observeAsState()
+    val cachedcinfirmpassword by signInSharedViewModel.ConfirmPassword.observeAsState()
+
     var Agreed by remember { mutableStateOf(false) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -131,6 +139,7 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
     }
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
+    val imageSizeForLargeScreen = (screenHeight.value/3.054).dp
 
 
 
@@ -169,6 +178,25 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
         }
     }
 
+    LaunchedEffect(cachedfname,cachedLname,cachedemail,cachedpassword) {
+        if(cachedfname.isNotNull() && cachedfname!!.isNotBlank()){
+            firstName = cachedfname!!
+        }
+        if(cachedLname.isNotNull() && cachedLname!!.isNotBlank()){
+            lastName = cachedLname!!
+        }
+        if(cachedemail.isNotNull() && cachedemail!!.isNotBlank()){
+            email = cachedemail!!
+        }
+        if(cachedpassword.isNotNull() && cachedpassword!!.isNotBlank()){
+            password = cachedpassword!!
+        }
+        if(cachedcinfirmpassword.isNotNull() && cachedcinfirmpassword!!.isNotBlank()){
+            confirmPassword = cachedcinfirmpassword!!
+        }
+
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -190,9 +218,10 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.jipvi_logo1),
+                painter = painterResource(id = R.drawable.health_bliss_logo_final_1),
                 contentDescription = "Company Logo",
-                modifier = Modifier.size(if(screenHeight>700.dp) 300.dp else 200.dp),
+                modifier = Modifier.size(if(screenHeight>700.dp) imageSizeForLargeScreen else 150.dp)
+                    .padding(if(screenHeight>700.dp) 25.dp else 0.dp),
                 contentScale = ContentScale.Fit
             )
         }
@@ -222,7 +251,7 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
             TransparentTextFieldForPassword(
                 value = password,
                 onValueChange = { password = it },
-                label = "Password"
+                label = "Password(Minimum 6 characters)"
             )
             HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -262,6 +291,7 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
                     text = "Privacy Policy",
                     color = colorResource(id = homeScreenBlue),
                     modifier = Modifier.clickable {
+                            signInSharedViewModel.set(firstName,lastName,email,password,confirmPassword)
                             onNavigateToPrivacyPolicy()
                     }
                 )
@@ -275,8 +305,10 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
                             signinclick = true
                             email = ""
                             password = ""
+                            confirmPassword = ""
                             firstName = ""
                             lastName = ""
+                            signInSharedViewModel.delete()
                         }
                         else{
                             ToastManager.showToast(context,"Password does not match",Toast.LENGTH_SHORT)
@@ -293,15 +325,16 @@ fun SignUpScreen(OnNavigateToLogIn:() -> Unit,
                     contentColor = Color.White)
             ) {
                 Text(
-                    text = "Sign In",
+                    text = "Sign Up",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
-        Text("Already have an account? Log in.",
+        Text("Already have an account? Sign In.",
             modifier = Modifier
                 .clickable {
+                    signInSharedViewModel.delete()
                     OnNavigateToLogIn()
                 }
                 .align(Alignment.CenterHorizontally), color = colorResource(id = homeScreenBlue))
