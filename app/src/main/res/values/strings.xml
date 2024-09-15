@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Health Bliss</string>
-    <string name="updateDetails">Update Details</string>
+    <string name="updateDetails">Update Details(Active User)</string>
     <string name="Language">Language</string>
     <string name="units">Units</string>
     <string name="UserManagement">User Management</string>

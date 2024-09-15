@@ -74,7 +74,7 @@ fun MyDeviceScreen(onNavBackClicked:()->Unit,
                 .fillMaxSize()
         ) {
             items(devices?: emptyList()) { 
-                DeviceInfoRow(name = it.name, address = it.address)
+                DeviceInfoRow(name = "Body Scale", address = it.address)
             }
         }
             

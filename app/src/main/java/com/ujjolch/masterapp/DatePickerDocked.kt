@@ -191,3 +191,12 @@ fun ageToMillis(age: Int): Long {
 
     return millis
 }
+
+fun getCurrentDateInMillis():Long{
+    val currentDate = LocalDate.now()
+    val millis = currentDate.atStartOfDay(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli()
+
+    return millis
+}

@@ -14,6 +14,12 @@ sealed class Language(val Language:String,
     object Chinese:Language("Chinese","zh")
     object Marathi:Language("Marathi","mr")
     object Kannada:Language("Kannada","kn")
+    object Sanskrit:Language("Sanskrit","sa")
+    object Tamil:Language("Tamil","ta")
+    object Telugu:Language("Telugu","te")
+    object Malayalam:Language("Malayalam","ml")
+    object Sindhi:Language("Sindhi","sd")
+    object Urdu:Language("Urdu","ur")
 }
 
 val listoflanguages = listOf<Language>(Language.English,
@@ -23,6 +29,12 @@ val listoflanguages = listOf<Language>(Language.English,
     Language.Gujarati,
     Language.Marathi,
     Language.Kannada,
+    Language.Sanskrit,
+    Language.Tamil,
+    Language.Telugu,
+    Language.Malayalam,
+    Language.Sindhi,
+    Language.Urdu,
     Language.Spanish,
     Language.German,
     Language.French,

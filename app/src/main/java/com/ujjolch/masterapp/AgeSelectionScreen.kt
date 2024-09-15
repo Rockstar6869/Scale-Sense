@@ -1,5 +1,6 @@
 package com.ujjolch.masterapp
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -90,11 +92,15 @@ fun DOBSelectorScreen(sharedViewModel: SharedViewModel,
     var selectedDate by remember {
         mutableStateOf("")
     }
+    var currentDate by remember {
+        mutableStateOf(0L)
+    }
     var showDatePicker by remember { mutableStateOf(false) }
     var convertedDate by remember {
         mutableStateOf(0L)
     }
     val userData by userDetailsViewModel.userData.observeAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(userData) {
         if(userData.isNotNull()){
@@ -105,6 +111,9 @@ fun DOBSelectorScreen(sharedViewModel: SharedViewModel,
         if(selectedDate.isNotBlank()){
             convertedDate = convertDateToMillis(selectedDate)
         }
+    }
+    LaunchedEffect(Unit) {
+        currentDate = getCurrentDateInMillis()
     }
     Box(modifier = Modifier
         .fillMaxSize()
@@ -174,8 +183,14 @@ fun DOBSelectorScreen(sharedViewModel: SharedViewModel,
         Button(
             onClick = {
                 if(selectedDate.isNotBlank()) {
-                    sharedViewModel.updateDOB(convertedDate)
-                    onNavigateToHeightScreen()
+                    if(convertedDate<=currentDate) {
+                        sharedViewModel.updateDOB(convertedDate)
+                        onNavigateToHeightScreen()
+                    }
+                    else{
+                        ToastManager.showToast(context,"Please select a valid D.O.B", Toast.LENGTH_SHORT)
+                    }
+
                 }
                       },
             modifier = Modifier

@@ -83,6 +83,9 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
     var progress by remember {
         mutableStateOf(false)
     }
+    var yesClicked  by remember {
+        mutableStateOf(false)
+    }
     val availableDevices by bleScanViewModel.availableDevices.observeAsState(emptyList())
 //    val MacAd = "D8:E7:2F:CA:C6:EA"
     val MacAd = remember {
@@ -136,6 +139,9 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
     }
     var userSelectedWeightUnit by remember {  //This is the Unit that is selected by the user
         mutableStateOf("")
+    }
+    var showNoImpedancePopUp by remember {
+        mutableStateOf(false)
     }
 
     LaunchedEffect(userUnit,Locked,lastWeight) {
@@ -227,6 +233,9 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                         )
                         userDetailsViewModel.gethistlist()
                         showHealthReport = true
+                        if(impedence == 0){
+                            NoImpedanceAlertBox(onDismiss = {})
+                        }
                     }
                     else if(lastWeight!=0.0 && abs(weightinkgs-lastWeight)<3.0){
                         userDetailsViewModel.updatehistlist(
@@ -238,6 +247,16 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                         )
                         userDetailsViewModel.gethistlist()
                         showHealthReport = true
+                        LaunchedEffect(impedence) {
+                            delay(500)
+                                if(impedence == 0){
+                                    showNoImpedancePopUp = true
+                                }
+
+                        }
+                        if(showNoImpedancePopUp){
+                            NoImpedanceAlertBox(onDismiss = {showNoImpedancePopUp = false})
+                        }
                     }
                     else if(lastWeight!=0.0 && abs(weightinkgs-lastWeight)>3.0){
                         AlertBox(
@@ -252,7 +271,14 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                 )
                                 userDetailsViewModel.gethistlist()
                                 showHealthReport = true
+                                yesClicked = true
                             })
+                        if(yesClicked && impedence == 0){
+                            NoImpedanceAlertBox(onDismiss = { yesClicked = false})
+                        }
+                        else{
+                            yesClicked = false
+                        }
                     }
                 }
                 weight = addDecimalPoint2(
@@ -474,10 +500,15 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                             Column {
                                 if(messagebodyproperties=="" || !finddevice) {
                                     Row (Modifier.padding(start = if(userSelectedWeightUnit == "lb") 8.dp else 0.dp)){
-                                        Row (Modifier.fillMaxWidth(),
+                                        Row (
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 4.dp),
                                             horizontalArrangement = Arrangement.Center) {
                                             Text(
                                                 text = stringResource(id = R.string.Unconnected),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
                                                 fontSize = if (screenWidthDp < 600.dp) 17.sp else 25.sp,
 //                                        fontWeight = FontWeight.Bold,
                                                 color = Color.White
@@ -947,7 +978,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                                 age ?: 0,
                                                 Calculate.BMI(userdata?.heightincm ?: 0.0, lastWeight)
                                             )
-                                        }%" else "0.0",
+                                        }%" else "N/A",
                                         color = colorResource(id = homeScreenBlue),
                                         modifier = Modifier.padding(vertical = 8.dp),
                                         fontSize = dynamicFontSize
@@ -977,7 +1008,7 @@ fun HomeScreen(bleScanViewModel: BleScanViewModel = viewModel(),
                                             age ?: 0,
                                             Calculate.BMI(userdata?.heightincm ?: 0.0, weightinkgs)
                                         )
-                                    }%" else "0.0",
+                                    }%" else "N/A",
                                     color = colorResource(id = homeScreenBlue),
                                     modifier = Modifier.padding(vertical = 8.dp),
                                     fontSize = dynamicFontSize

@@ -88,7 +88,7 @@ fun GenderSelectionScreen(sharedViewModel: SharedViewModel,
                                 color = if (selectedGender == "Male") Color.Black else Color.Transparent
                             )) {
                         Image(
-                            painter = painterResource(id = R.drawable.male_option2),
+                            painter = painterResource(id = R.drawable.male),
                             contentDescription = "Male",
                             modifier = Modifier
                                 .height(250.dp)
@@ -110,7 +110,7 @@ fun GenderSelectionScreen(sharedViewModel: SharedViewModel,
                                 color = if (selectedGender == "Female") Color.Black else Color.Transparent
                             )) {
                         Image(
-                            painter = painterResource(id = R.drawable.femaleimagepotion3),
+                            painter = painterResource(id = R.drawable.female),
                             contentDescription = "Female",
                             modifier = Modifier
                                 .height(250.dp)

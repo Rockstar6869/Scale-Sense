@@ -242,7 +242,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                             bodyAge = (age!!).toString(),
                             bodyScore = "0",
                             bodyWeight = "$userUnitLastWeight2",
-                            bodyFat = if(!isImpedanceZero) bodyFatPercent.toString() else "0.0",
+                            bodyFat = if(!isImpedanceZero) bodyFatPercent.toString() else "N/A",
                             prevDate = secondLastWeightDate,
                             wdiff = "${(lastWeight-secondLastWeight).format(2).toDouble()}",
                             BMIdiff = "${(BMI-secondLastBMI).format(2).toDouble()}",
@@ -344,7 +344,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.BodyWaterP,
-                                    value = if(!isImpedanceZero) "$bodyWaterPercent%" else "0.0",
+                                    value = if(!isImpedanceZero) "$bodyWaterPercent%" else "N/A",
                                     Tag = {
                                         if (!isImpedanceZero){
                                             if (bodyWaterPercent <= 50) {
@@ -378,7 +378,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.BodyFatP,
-                                    value = if(!isImpedanceZero) "$bodyFatPercent%" else "0.0",
+                                    value = if(!isImpedanceZero) "$bodyFatPercent%" else "N/A",
                                     Tag = {
                                         if (!isImpedanceZero){
                                             if (bodyFatPercent <= 6) {
@@ -418,7 +418,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
 
                                 ExpandableRow(
                                     index = R.string.LBMP,
-                                    value = if(!isImpedanceZero) "$LeanBodyMassPercent%" else "0.0",
+                                    value = if(!isImpedanceZero) "$LeanBodyMassPercent%" else "N/A",
                                     Tag = {
                                         if (!isImpedanceZero){
                                             if (LeanBodyMassPercent < 68) {
@@ -456,7 +456,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
 
 
                                 ExpandableRow(index = R.string.BoneP,
-                                    value = if(!isImpedanceZero) "$BoneWeightPercent%" else "0.0",
+                                    value = if(!isImpedanceZero) "$BoneWeightPercent%" else "N/A",
                                     Tag = {
                                         if (!isImpedanceZero){
                                             if (BoneWeightPercent <= 10) {
@@ -489,7 +489,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.ProtienP,
-                                    value = if(!isImpedanceZero) "$ProtienPercent%" else "0.0",
+                                    value = if(!isImpedanceZero) "$ProtienPercent%" else "N/A",
                                     Tag = {
                                         if (!isImpedanceZero){
                                             if (ProtienPercent <= 15.9) {
@@ -522,7 +522,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.MusscleP,
-                                    value = if(!isImpedanceZero) "$MusclePercent%" else "0.0",
+                                    value = if(!isImpedanceZero) "$MusclePercent%" else "N/A",
                                     Tag = {
                                         if (!isImpedanceZero){
                                             if (MusclePercent < 73) {
@@ -568,7 +568,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
 //                                )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.VFI,
-                                    value = if(!isImpedanceZero) "$VFI" else "0.0",
+                                    value = if(!isImpedanceZero) "$VFI" else "N/A",
                                     Tag = {
                                         if (!isImpedanceZero){
                                             if (VFI < 10) {
@@ -603,7 +603,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.subcutFat,
-                                    value =  if(!isImpedanceZero) "$SubcutaneousFat Kg" else "0.0",
+                                    value =  if(!isImpedanceZero) "$SubcutaneousFat Kg" else "N/A",
                                     Tag = {
                                         if(!isImpedanceZero){
                                         if (SubcutaneousFat < 5) {
@@ -650,7 +650,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRow(index = R.string.BMR,
-                                    value = if(!isImpedanceZero)  "$BMR kcal" else "0.0",
+                                    value = if(!isImpedanceZero)  "$BMR kcal" else "N/A",
                                     Tag = {
                                         if(!isImpedanceZero){
                                         if(BMR<=1450){
@@ -688,7 +688,7 @@ fun HealthReportScreen(onBackClick: () -> Unit,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 ExpandableRowForAMR(index = R.string.AMR,
-                                    value =  if(!isImpedanceZero) "$AMR Kcal" else "0.0",
+                                    value =  if(!isImpedanceZero) "$AMR Kcal" else "N/A",
                                     Tag = { },
                                     onSelectedOptionChange = {
                                         if (it == 0) {

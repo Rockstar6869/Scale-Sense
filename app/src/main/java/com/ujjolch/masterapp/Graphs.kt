@@ -232,7 +232,8 @@ fun BodyWaterPercentGraph(userHist:List<hist>,HeightInCM:Double,Age:Int,Gender:S
     else{
         val  data = datapoints.get(0)
         val date = datehist.get(0)
-        GraphForSingleValue(label = date, value = data.y.toDouble(), unit = "%")
+
+        GraphForSingleValue(label = date, value = if(userHist.size==1 && userHist.get(0).impedance == 0) 0.0 else data.y.toDouble(), unit = "%")
     }
 }
 
@@ -311,7 +312,7 @@ fun BodyFatPercentGraph(userHist:List<hist>,HeightInCM:Double,Age:Int,Gender:Str
     else{
         val  data = datapoints.get(0)
         val date = datehist.get(0)
-        GraphForSingleValue(label = date, value = data.y.toDouble(), unit = "%")
+        GraphForSingleValue(label = date, value = if(userHist.size==1 && userHist.get(0).impedance == 0) 0.0 else data.y.toDouble(), unit = "%")
     }
 
 }
@@ -449,13 +450,21 @@ fun LeanBodyMassGraph(userHist:List<hist>,Age:Int,HeightInCM: Double,Gender: Str
     if (Gender == "M") {
         if(selectedTimeRange == 0) {
             datapoints = userHist.mapIndexed { index, hist ->
-                Point(
-                    index.toFloat(),
-                    Calculate.LeanBodyMass(
-                        hist.weight,
-                        Calculate.BodyFatPercentforMale(Age, Calculate.BMI(HeightInCM, hist.weight))
-                    ).toFloat()
-                )
+                if(hist.impedance!=0) {
+                    Point(
+                        index.toFloat(),
+                        Calculate.LeanBodyMass(
+                            hist.weight,
+                            Calculate.BodyFatPercentforMale(
+                                Age,
+                                Calculate.BMI(HeightInCM, hist.weight)
+                            )
+                        ).toFloat()
+                    )
+                }
+                else{
+                    Point(index.toFloat(),0f)
+                }
             }
             datehist =  userHist.map { convert4digYearToNoYear(it.date) }
         }
@@ -489,16 +498,24 @@ fun LeanBodyMassGraph(userHist:List<hist>,Age:Int,HeightInCM: Double,Gender: Str
     else{
         if(selectedTimeRange == 0) {
             datapoints = userHist.mapIndexed { index, hist ->
-                Point(
-                    index.toFloat(),
-                    Calculate.LeanBodyMass(
-                        hist.weight,
-                        Calculate.BodyFatPercentforFemale(
-                            Age,
-                            Calculate.BMI(HeightInCM, hist.weight)
-                        )
-                    ).toFloat()
-                )
+                if(hist.impedance!=0) {
+                    Point(
+                        index.toFloat(),
+                        Calculate.LeanBodyMass(
+                            hist.weight,
+                            Calculate.BodyFatPercentforFemale(
+                                Age,
+                                Calculate.BMI(HeightInCM, hist.weight)
+                            )
+                        ).toFloat()
+                    )
+                }
+                else{
+                    Point(
+                        index.toFloat(),
+                       0f
+                    )
+                }
             }
             datehist =  userHist.map { convert4digYearToNoYear(it.date) }
         }
@@ -536,7 +553,7 @@ fun LeanBodyMassGraph(userHist:List<hist>,Age:Int,HeightInCM: Double,Gender: Str
     else{
         val  data = datapoints.get(0)
         val date = datehist.get(0)
-        GraphForSingleValue(label = date, value = data.y.toDouble(), unit = "Kgs")
+        GraphForSingleValue(label = date, value = if(userHist.size==1 && userHist.get(0).impedance == 0) 0.0 else data.y.toDouble(), unit = "Kgs")
     }
 }
 
@@ -548,7 +565,18 @@ fun BMRGraph(userHist:List<hist>,Age:Int,HeightInCM: Double,Gender: String = "M"
     if (Gender == "M") {
         if(selectedTimeRange == 0) {
             datapoints = userHist.mapIndexed { index, hist ->
-                Point(index.toFloat(), Calculate.BMRforMale(hist.weight, HeightInCM, Age).toFloat())
+                if(hist.impedance!=0) {
+                    Point(
+                        index.toFloat(),
+                        Calculate.BMRforMale(hist.weight, HeightInCM, Age).toFloat()
+                    )
+                }
+                else{
+                    Point(
+                        index.toFloat(),
+                        0f
+                    )
+                }
             }
             datehist =  userHist.map { convert4digYearToNoYear(it.date) }
         }
@@ -602,7 +630,7 @@ fun BMRGraph(userHist:List<hist>,Age:Int,HeightInCM: Double,Gender: String = "M"
     else{
         val  data = datapoints.get(0)
         val date = datehist.get(0)
-        GraphForSingleValue(label = date, value = data.y.toDouble(), unit = "Kcal")
+        GraphForSingleValue(label = date, value = if(userHist.size==1 && userHist.get(0).impedance == 0) 0.0 else data.y.toDouble(), unit = "Kcal")
     }
 
 }

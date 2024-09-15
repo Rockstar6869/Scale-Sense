@@ -214,7 +214,7 @@ fun NewAddDeviceScreen(bleScanViewModel: BleScanViewModel,
                 if (finddevice) {
                     devicesfound.value.forEach {
                         DeviceFoundRow(
-                            deviceName = "Themisto body Scale",
+                            deviceName = "Body Scale",
                             macAddress = it.address
                         ) {
                             userDetailsViewModel.bindDevice(
